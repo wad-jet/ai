@@ -5,7 +5,8 @@
 Спецификация описывает полный цикл работы агента над новой фичей — от идеи до коммита в git-flow ветку. Процесс работает внутри ralph-loop, который активен от EXPLORE до ARCHIVE. Поддерживается feedback loop между разработкой и дизайном.
 
 <HARD-GATE>
-Используется **только** скиллы из https://github.com/obra/superpowers
+1. Используется **только** скиллы из https://github.com/obra/superpowers для процесса SDD (Spec-Driven Documentation)
+2. Нужно убедиться, что для opencode подключен плагин opencode-ralph-loop
 </HARD-GATE>
 
 ---
