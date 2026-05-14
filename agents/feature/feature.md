@@ -5,7 +5,7 @@
 Спецификация описывает полный цикл работы агента над новой фичей — от идеи до коммита в git-flow ветку. Процесс работает внутри ralph-loop, который активен от EXPLORE до ARCHIVE. Поддерживается feedback loop между разработкой и дизайном.
 
 <HARD-GATE>
-1. Используется **только** скиллы из https://github.com/obra/superpowers для процесса SDD (Spec-Driven Documentation)
+1. Используется **только** скиллы из https://github.com/obra/superpowers для процесса SDD (Spec-Driven Documentation). Данные скилы должны быть установлены.
 2. Нужно убедиться, что для opencode подключен плагин opencode-ralph-loop
 </HARD-GATE>
 
@@ -64,7 +64,8 @@ APPLY
 
 ### EXPLORE — Обсуждение
 
-**Вход:** пользователь описывает фичу. 
+**Вход:** пользователь описывает фичу. Ключевым признаком фичи может быть префикс **feat:**, либо LLM понимает начало фичи из общего контекста.
+
 <HARD-GATE>
 Агент запускает `/ralph-loop`.
 </HARD-GATE>
@@ -147,6 +148,10 @@ APPLY
 ### APPLY — Разработка
 
 **Вход:** после PROPOSE. Пользователь выбрал execution option.
+
+<HARD-GATE>
+Перед началом выполнения этапа APPLY необходимо выполнить **/compact** (Compact Session)
+</HARD-GATE>
 
 **Чек-лист задачи (todowrite):**
 - [ ] Каждая задача из плана — отдельный item в checklist
