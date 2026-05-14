@@ -1,0 +1,5 @@
+.opencode
+node_modules
+.env
+dist
+*.tgz
