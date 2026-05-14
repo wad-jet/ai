@@ -1,0 +1,60 @@
+# Set to false to ignore the global config (~/.config/agpack/agpack.yml):
+# global: false
+
+targets:
+  # - claude
+  - opencode
+  # - codex
+  # - cursor
+  # - copilot
+
+dependencies:
+  skills:
+    - url: https://github.com/obra/superpowers
+      path: skills
+    - url: https://github.com/github/awesome-copilot
+      path: skills/git-commit
+    - url: https://github.com/github/awesome-copilot
+      path: skills/git-flow-branch-creator
+
+    # Point to a single skill folder:
+    # - url: https://github.com/owner/repo
+    #   path: skills/my-skill
+    #   ref: v1.0.0
+    # Multiple URLs (tried in order, e.g. HTTPS + SSH fallback):
+    # - url:
+    #     - https://github.com/owner/repo
+    #     - git@github.com:owner/repo.git
+    #   path: skills/my-skill
+    # Or to a directory of skill folders (each subfolder is deployed separately):
+    # - url: https://github.com/owner/repo
+    #   path: skills
+
+  commands:
+    # Point to a single file or a directory of command files:
+    # - url: https://github.com/owner/repo
+    #   path: commands/my-command.md
+
+  agents:
+    - url: https://github.com/wad-jet/ai
+      path: agents/feature/feature.md
+    # - url: https://github.com/wad-jet/ai
+    #   path: agents/thinker/thinker.md
+
+    # Point to a single file or a directory of agent files:
+    # - url: https://github.com/owner/repo
+    #   path: agents/my-agent.md
+
+  mcp:
+    # - name: sequential-thinking
+    #   command: npx
+    #   args: [
+    #     "-y",
+    #     "@modelcontextprotocol/server-sequential-thinking"
+    #   ]
+
+    # - name: my-server
+    #   command: npx
+    #   args: ["-y", "@example/mcp-server"]
+    #   env:
+    #     API_KEY: ${API_KEY}   # resolved from .env or shell environment

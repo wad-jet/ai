@@ -1,0 +1,73 @@
+generated_at: '2026-05-14T09:16:48.982011+00:00'
+agpack_version: 0.3.1
+installed:
+- url: https://github.com/obra/superpowers
+  resolved_ref: f2cbfbefebbfef77321e4c9abc9e949826bea9d7
+  type: skill
+  deployed_files:
+  - .opencode/skills/brainstorming/SKILL.md
+  - .opencode/skills/brainstorming/scripts/frame-template.html
+  - .opencode/skills/brainstorming/scripts/helper.js
+  - .opencode/skills/brainstorming/scripts/server.cjs
+  - .opencode/skills/brainstorming/scripts/start-server.sh
+  - .opencode/skills/brainstorming/scripts/stop-server.sh
+  - .opencode/skills/brainstorming/spec-document-reviewer-prompt.md
+  - .opencode/skills/brainstorming/visual-companion.md
+  - .opencode/skills/dispatching-parallel-agents/SKILL.md
+  - .opencode/skills/executing-plans/SKILL.md
+  - .opencode/skills/finishing-a-development-branch/SKILL.md
+  - .opencode/skills/receiving-code-review/SKILL.md
+  - .opencode/skills/requesting-code-review/SKILL.md
+  - .opencode/skills/requesting-code-review/code-reviewer.md
+  - .opencode/skills/subagent-driven-development/SKILL.md
+  - .opencode/skills/subagent-driven-development/code-quality-reviewer-prompt.md
+  - .opencode/skills/subagent-driven-development/implementer-prompt.md
+  - .opencode/skills/subagent-driven-development/spec-reviewer-prompt.md
+  - .opencode/skills/systematic-debugging/CREATION-LOG.md
+  - .opencode/skills/systematic-debugging/SKILL.md
+  - .opencode/skills/systematic-debugging/condition-based-waiting-example.ts
+  - .opencode/skills/systematic-debugging/condition-based-waiting.md
+  - .opencode/skills/systematic-debugging/defense-in-depth.md
+  - .opencode/skills/systematic-debugging/find-polluter.sh
+  - .opencode/skills/systematic-debugging/root-cause-tracing.md
+  - .opencode/skills/systematic-debugging/test-academic.md
+  - .opencode/skills/systematic-debugging/test-pressure-1.md
+  - .opencode/skills/systematic-debugging/test-pressure-2.md
+  - .opencode/skills/systematic-debugging/test-pressure-3.md
+  - .opencode/skills/test-driven-development/SKILL.md
+  - .opencode/skills/test-driven-development/testing-anti-patterns.md
+  - .opencode/skills/using-git-worktrees/SKILL.md
+  - .opencode/skills/using-superpowers/SKILL.md
+  - .opencode/skills/using-superpowers/references/codex-tools.md
+  - .opencode/skills/using-superpowers/references/copilot-tools.md
+  - .opencode/skills/using-superpowers/references/gemini-tools.md
+  - .opencode/skills/verification-before-completion/SKILL.md
+  - .opencode/skills/writing-plans/SKILL.md
+  - .opencode/skills/writing-plans/plan-document-reviewer-prompt.md
+  - .opencode/skills/writing-skills/SKILL.md
+  - .opencode/skills/writing-skills/anthropic-best-practices.md
+  - .opencode/skills/writing-skills/examples/CLAUDE_MD_TESTING.md
+  - .opencode/skills/writing-skills/graphviz-conventions.dot
+  - .opencode/skills/writing-skills/persuasion-principles.md
+  - .opencode/skills/writing-skills/render-graphs.js
+  - .opencode/skills/writing-skills/testing-skills-with-subagents.md
+  path: skills
+- url: https://github.com/github/awesome-copilot
+  resolved_ref: 97cc3f24602b6431b82dbce2afec7a1f3611664f
+  type: skill
+  deployed_files:
+  - .opencode/skills/git-commit/SKILL.md
+  path: skills/git-commit
+- url: https://github.com/github/awesome-copilot
+  resolved_ref: 97cc3f24602b6431b82dbce2afec7a1f3611664f
+  type: skill
+  deployed_files:
+  - .opencode/skills/git-flow-branch-creator/SKILL.md
+  path: skills/git-flow-branch-creator
+- url: https://github.com/wad-jet/ai
+  resolved_ref: 13cff9981b84ca446eb9faac866f9ed97d35ff80
+  type: agent
+  deployed_files:
+  - .opencode/agents/feature.md
+  path: agents/feature/feature.md
+mcp: []
