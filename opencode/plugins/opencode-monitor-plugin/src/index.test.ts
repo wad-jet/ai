@@ -33,19 +33,25 @@ describe("integration: collector pipeline", () => {
     handleTokenEvent(BASE, tokenEvent as any, ts);
 
     const chatInput = { sessionID: "sess-1", agent: "default" };
-    const chatOutput = {
-      message: { role: "user", parts: [{ type: "text", text: "hello" }] },
+    const chatUserOutput = {
+      message: { role: "user" },
+      parts: [{ type: "text", text: "hello" }],
+    };
+    handleChatMessage(BASE, chatInput as any, chatUserOutput as any, ts);
+    const chatAssistantOutput = {
+      message: { role: "assistant" },
       parts: [{ type: "text", text: "world" }, { type: "reasoning", text: "thinking..." }],
     };
-    handleChatMessage(BASE, chatInput as any, chatOutput as any, ts);
+    handleChatMessage(BASE, chatInput as any, chatAssistantOutput as any, ts);
 
     const tokenRows = readCSV(BASE, "token_status", 11);
     assert.equal(tokenRows.length, 1);
     assert.equal(tokenRows[0][5], "100");
 
     const logRecords = readJSONL(BASE, "session-logs") as any[];
-    assert.equal(logRecords.length, 1);
+    assert.equal(logRecords.length, 2);
     assert.equal(logRecords[0].input, "hello");
-    assert.equal(logRecords[0].thinking, "thinking...");
+    assert.equal(logRecords[1].output, "world");
+    assert.equal(logRecords[1].thinking, "thinking...");
   });
 });
