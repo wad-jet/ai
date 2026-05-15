@@ -5,9 +5,32 @@
 ## Возможности
 
 - **Статистика токенов** — сбор и агрегация входящих/исходящих токенов, reasoning tokens, cache read/write, стоимости
-- **Лог сессий** — запись input/output модели, цепочек рассуждений (thinking) и применённых скилов
-- **Tool** — запрос статистики через `/` команду в OpenCode
-- **CLI** — запрос статистики и просмотр логов из терминала
+- **Лог сессий** — запись input/output модели, цепочек рассуждений (thinking), метаданных (finish_reason, duration_ms, mode, error, cwd), project_id, git_branch и применённых скилов
+- **Slash-команда `/token-status`** — запрос статистики прямо из диалога с AI
+- **CLI** — запрос статистики и очистка данных из терминала
+
+## Установка
+
+Плагин подключается через `opencode.json`:
+
+```json
+{
+  "plugin": ["./opencode/plugins/opencode-monitor-plugin/dist/index.js"]
+}
+```
+
+После подключения плагин автоматически:
+- Собирает статистику токенов через hook `event` (`message.updated`)
+- Логирует запросы/ответы через hook `chat.message`
+- Регистрирует slash-команду `/token-status` (копирует command-файл в `~/.config/opencode/command/`)
+
+### Зависимости
+
+```bash
+cd opencode/plugins/opencode-monitor-plugin
+npm install
+npm run build
+```
 
 ## Структура данных
 
@@ -25,15 +48,11 @@
     └── ...
 ```
 
-Каждая директория внутри разбивает данные по дням (UTC). Один файл — все записи за одну дату.
-
----
+Каждая директория разбивает данные по дням (UTC). Один файл — все записи за одну дату.
 
 ### token_status/ — статистика токенов
 
-**Назначение:** сбор данных о потреблении токенов для последующей агрегации и расчёта стоимости.
-
-**Формат:** CSV без заголовка, одна строка — один `message.updated` event (один ответ модели).
+**Формат:** CSV без заголовка, одна строка — один `message.updated` event.
 
 ```
 timestamp,agent,session_id,provider_id,model_id,input_tokens,output_tokens,reasoning_tokens,cache_read,cache_write,cost
@@ -42,24 +61,18 @@ timestamp,agent,session_id,provider_id,model_id,input_tokens,output_tokens,reaso
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `timestamp` | ISO 8601 | Время события |
-| `agent` | string | Имя агента (build, explore, feature и т.д.) |
+| `agent` | string | Имя агента (feature, explore, task и т.д.) |
 | `session_id` | string | ID сессии |
 | `provider_id` | string | Провайдер модели (opencode, anthropic, openai и т.д.) |
 | `model_id` | string | Модель (big-pickle, claude-sonnet-4, gpt-4o и т.д.) |
 | `input_tokens` | number | Входящие токены |
 | `output_tokens` | number | Исходящие токены |
-| `reasoning_tokens` | number | Токены цепочки рассуждений (thinking/reasoning) |
+| `reasoning_tokens` | number | Токены цепочки рассуждений (thinking) |
 | `cache_read` | number | Токены, прочитанные из кэша |
 | `cache_write` | number | Токены, записанные в кэш |
-| `cost` | number | Стоимость в долларах (0, если модель не имеет цены) |
-
-**Коллектор:** hook `event` (событие `message.updated`). Записывается каждый чанк ответа модели, содержащий токены.
-
----
+| `cost` | number | Стоимость в долларах (0, если нет цены) |
 
 ### session-logs/ — логи сессий
-
-**Назначение:** запись полного текста запросов пользователя и ответов модели для просмотра и поиска.
 
 **Формат:** JSONL (одна JSON-строка на запись).
 
@@ -83,112 +96,156 @@ timestamp,agent,session_id,provider_id,model_id,input_tokens,output_tokens,reaso
   "skills": ["test-driven-development", "writing-plans"],
   "input": "текст запроса пользователя",
   "output": "ответ модели в markdown",
-  "thinking": "цепочка рассуждений модели (опционально)"
+  "thinking": "цепочка рассуждений (опционально)"
 }
 ```
 
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `timestamp` | ISO 8601 | Время сообщения |
-| `agent` | string | Имя агента, отправившего сообщение |
+| `agent` | string | Имя агента |
 | `session_id` | string | ID сессии |
 | `username` | string | Системное имя пользователя (из `os.userInfo()`) |
-| `root_dir` | string | Путь к корневой папке проекта (опционально) |
+| `root_dir` | string | Путь к корню проекта |
 | `project_id` | string | ID проекта (из `input.project.id`, опционально) |
-| `git_branch` | string | Текущая ветка git (из `git rev-parse --abbrev-ref HEAD`, опционально) |
+| `git_branch` | string | Текущая ветка git (опционально) |
 | `provider_id` | string | Провайдер модели (опционально) |
 | `model_id` | string | Модель (опционально) |
-| `opencode_version` | string | Версия OpenCode (из `opencode --version`) |
-| `mode` | string | Режим: agent/chat (только для assistant, опционально) |
-| `finish_reason` | string | Причина завершения: stop/length/error/tool_use (только для assistant, опционально) |
-| `duration_ms` | number | Длительность ответа в мс (только для assistant, опционально) |
-| `cwd` | string | Рабочая директория на момент запроса (только для assistant, опционально) |
-| `error` | object | Объект ошибки, если ответ завершился с ошибкой (опционально) |
-| `skills` | string[] | Список вызванных скилов (только для assistant, опционально) |
-| `input` | string | Текст запроса пользователя (только для user-сообщений) |
-| `output` | string | Текст ответа модели (только для assistant-сообщений) |
-| `thinking` | string | Цепочка рассуждений модели (только если есть) |
-
-**Коллектор:** hook `chat.message` для прямых сообщений и hook `event` (части `part`) для потокового сбора ответов. Для каждого обмена user → assistant создаётся две записи: одна с `input`, другая с `output`.
-
-## Сборка
-
-```bash
-cd opencode/plugins/opencode-monitor-plugin
-npm install
-npm run build
-```
-
-## Подключение в OpenCode
-
-Добавить в `opencode.json`:
-
-```json
-{
-  "plugin": [
-    "@opencode-dev/opencode-monitor-plugin"
-  ]
-}
-```
-
-Плагин должен быть установлен как npm-пакет в окружении OpenCode (либо добавлен в зависимости `.opencode/package.json`, либо установлен глобально).
-
-После подключения плагин автоматически:
-- Собирает статистику токенов через hook `event` (`message.updated`)
-- Логирует запросы/ответы через hook `chat.message`
+| `opencode_version` | string | Версия OpenCode |
+| `mode` | string | Режим: `agent`/`chat` (только assistant, опционально) |
+| `finish_reason` | string | Причина завершения: `stop`/`length`/`error`/`tool_use` (только assistant, опционально) |
+| `duration_ms` | number | Длительность ответа в мс (только assistant, опционально) |
+| `cwd` | string | Рабочая директория на момент запроса (только assistant, опционально) |
+| `error` | object | Объект ошибки (только assistant, опционально) |
+| `skills` | string[] | Список вызванных скилов (только assistant, опционально) |
+| `input` | string | Текст запроса пользователя (только user) |
+| `output` | string | Текст ответа модели (только assistant) |
+| `thinking` | string | Цепочка рассуждений модели (опционально) |
 
 ## Использование
 
-### Tool (внутри OpenCode)
+### Slash-команда `/token-status` (в диалоге с AI)
+
+После подключения плагина в OpenCode доступна команда `/token-status`. При вводе команды AI вызывает内置ный тул и показывает статистику.
 
 ```
-/token_status
-/token_status session_id=abc-123
-/token_status trend_days=30 agent_top_n=5
+/token-status
+/token-status daily=true
+/token-status trend_days=30
+/token-status agent_view=execution agent_top_n=5
+/token-status session_id=abc-123
+/token-status daily=true trend_days=30 agent_view=initiator agent_top_n=0
 ```
 
-Параметры:
+Команда принимает key=value аргументы:
 
 | Параметр | Тип | Описание | По умолчанию |
 |----------|-----|----------|--------------|
 | `session_id` | string | ID сессии для просмотра | текущая |
-| `include_children` | boolean | Включить дочерние сессии | false |
-| `agent_view` | string | `execution`, `initiator`, `both` | `both` |
-| `agent_sort` | string | Сортировка по `cost` или `tokens` | `cost` |
-| `agent_top_n` | number | Показать топ N агентов (0 = все) | 10 |
-| `trend_days` | number | Дней для анализа трендов | 7 |
-| `scope` | string | `project` или `all` | `all` |
-| `compact` | boolean | Пропустить тяжёлые таблицы | false |
-| `debug` | boolean | Показать отладочную информацию | false |
+| `include_children` | boolean | Включить дочерние сессии | `false` |
+| `agent_view` | string | Режим: `execution` (агенты-исполнители), `initiator` (агенты-инициаторы), `both` | `both` |
+| `agent_sort` | string | Сортировка агентов: `cost` (по стоимости) или `tokens` (по токенам) | `cost` |
+| `agent_top_n` | number | Показать топ N агентов. `0` = все | `10` |
+| `trend_days` | number | Глубина анализа трендов в днях | `7` |
+| `scope` | string | Фильтр: `project` (только текущий проект) или `all` (все проекты) | `all` |
+| `compact` | boolean | Пропустить тяжёлые таблицы (агенты, тренды) | `false` |
+| `debug` | boolean | Показать отладочную информацию | `false` |
+
+**Пример вывода** (в диалоге — markdown-таблицы):
+
+```
+## Token Usage Summary
+| Metric | Value |
+|--------|-------|
+| Total Input Tokens | 1,500 |
+| Total Output Tokens | 750 |
+| Reasoning Tokens | 200 |
+| Cache Read Tokens | 100 |
+| Cache Write Tokens | 50 |
+| **Total Cost** | **$0.0350** |
+
+## Agent Breakdown
+| Agent | Calls | Input | Output | Cost |
+|-------|-------|-------|--------|------|
+| default | 3 | 1,000 | 500 | $0.0300 |
+| feature | 1 | 500 | 250 | $0.0050 |
+```
+
+Режим `--daily` группирует статистику по календарным дням (дата извлекается из поля `timestamp`, а не из имени файла — это корректно работает, если за полный день накопилось несколько дневных файлов). Показывает количество вызовов модели, сумму входящих и исходящих токенов и общую стоимость за каждый день. Полезно для отслеживания дневных паттернов потребления, особенно в сочетании с `trend_days`.
+
+```
+## Daily Breakdown
+| Date | Calls | Input | Output | Cost |
+|------|-------|-------|--------|------|
+| 2026-05-14 | 5 | 2,000 | 1,000 | $0.0400 |
+| 2026-05-15 | 3 | 1,000 | 500 | $0.0200 |
+```
 
 ### CLI
 
+CLI-утилита `opencode-monitor` устанавливается вместе с плагином.
+
 ```bash
-# Статистика токенов
+# Статистика токенов (сводка + разбивка по агентам)
 opencode-monitor token-status
+
+# Сводка с разбивкой по дням
+opencode-monitor token-status --daily
+
+# Глубина анализа 30 дней, топ-5 агентов
 opencode-monitor token-status --trend-days=30 --agent-top-n=5
-opencode-monitor token-status --daily                                  # разбивка по дням
-opencode-monitor token-status --daily --trend-days=30 --agent-top-n=5
 
-# Просмотр логов сессии
-opencode-monitor session-log <session-id>
+# Разбивка по дням за 30 дней, все агенты
+opencode-monitor token-status --daily --trend-days=30 --agent-top-n=0
 
-# Список доступных сессий
-opencode-monitor session-log list
+# Параметры CLI (соответствуют параметрам slash-команды)
+opencode-monitor token-status --trend-days=30 --agent-view=initiator --agent-sort=tokens
+```
 
-# Поиск по содержимому логов
-opencode-monitor session-log search "ошибка"
+**Параметры CLI `token-status`:**
+
+| Параметр | Тип | Описание | По умолчанию |
+|----------|-----|----------|--------------|
+| `--session-id` | string | ID сессии | текущая |
+| `--include-children` | boolean | Включить дочерние сессии | `false` |
+| `--agent-view` | `execution`/`initiator`/`both` | Режим отображения агентов | `both` |
+| `--agent-sort` | `cost`/`tokens` | Сортировка | `cost` |
+| `--agent-top-n` | number | Топ N агентов (0 = все) | `10` |
+| `--trend-days` | number | Глубина анализа трендов | `7` |
+| `--scope` | `project`/`all` | Фильтр проекта | `all` |
+| `--compact` | boolean | Без тяжёлых таблиц | `false` |
+| `--debug` | boolean | Отладка | `false` |
+| `--daily` | boolean | Разбивка по дням | `false` |
+
+**Пример вывода CLI** (ASCII-таблицы):
+
+```
+ Token Usage Summary
+┌─────────────────────────┬────────────┐
+│ Metric                  │       Value │
+├─────────────────────────┼────────────┤
+│ Total Input Tokens      │      1,500 │
+│ Total Output Tokens     │        750 │
+│ Total Cost              │    $0.0350 │
+└─────────────────────────┴────────────┘
+ Agent Breakdown (top 10)
+┌─────────┬───────┬────────┬────────┬─────────┐
+│ Agent   │ Calls │  Input │ Output │    Cost │
+├─────────┼───────┼────────┼────────┼─────────┤
+│ default │     3 │  1,000 │    500 │ $0.0300 │
+│ feature │     1 │    500 │    250 │ $0.0050 │
+└─────────┴───────┴────────┴────────┴─────────┘
 ```
 
 ### Cleanup — очистка старых данных
 
-Команда для удаления старых файлов логов сессий и метрик токенов. Данные на диске разбиты по дням — удаляются целиком дневные файлы, дата которых старше указанного количества дней от сегодня.
+Команда для удаления старых дневных файлов. Файлы удаляются целиком (один файл = один день).
 
 **Процесс:**
-1. Собираются файлы из `token_status/` и/или `session-logs/`, дата которых старше N дней
-2. Выводится таблица с датами, типами данных и размером каждого файла
-3. Выводится запрос подтверждения: `Delete N files? (yes/no):`
-4. Только после ввода `yes` файлы удаляются безвозвратно
+1. Сбор файлов из `token_status/` и/или `session-logs/` старше N дней
+2. Вывод таблицы с датами, типом и размером
+3. Запрос подтверждения: `Delete N files? (yes/no):`
+4. Только после `yes` — безвозвратное удаление
 
 ```bash
 # Удалить все данные старше 30 дней
@@ -200,26 +257,17 @@ opencode-monitor cleanup --days 90 --session-logs
 # Только метрики токенов старше 7 дней
 opencode-monitor cleanup --days 7 --token-status
 
-# Предпросмотр: показать что будет удалено, но не удалять
+# Предпросмотр (без удаления)
 opencode-monitor cleanup --days 30 --dry-run
 ```
 
-### Формат вывода
+**Параметры `cleanup`:**
 
-**Tool** — markdown-таблицы, встраиваемые в диалог с AI:
+| Параметр | Тип | Описание | По умолчанию |
+|----------|-----|----------|--------------|
+| `--days` | number | **Обязательный.** Хранить файлы не старше N дней | — |
+| `--session-logs` | boolean | Только логи сессий | `false` |
+| `--token-status` | boolean | Только метрики токенов | `false` |
+| `--dry-run` | boolean | Предпросмотр без удаления | `false` |
 
-```
-## Token Usage Summary
-| Metric | Value |
-|--------|-------|
-| Total Input Tokens | 1,500 |
-| Total Output Tokens | 750 |
-| **Total Cost** | **$0.0350** |
-
-## Agent Breakdown
-| Agent | Calls | Input | Output | Cost |
-|-------|-------|-------|--------|------|
-| default | 3 | 1,000 | 500 | $0.0300 |
-```
-
-**CLI** — ASCII-таблицы для терминала.
+Если не указаны `--session-logs` и `--token-status`, очищаются оба типа данных.
