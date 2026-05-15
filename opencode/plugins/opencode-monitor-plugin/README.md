@@ -167,6 +167,8 @@ npm run build
 # Статистика токенов
 opencode-monitor token-status
 opencode-monitor token-status --trend-days=30 --agent-top-n=5
+opencode-monitor token-status --daily                                  # разбивка по дням
+opencode-monitor token-status --daily --trend-days=30 --agent-top-n=5
 
 # Просмотр логов сессии
 opencode-monitor session-log <session-id>
