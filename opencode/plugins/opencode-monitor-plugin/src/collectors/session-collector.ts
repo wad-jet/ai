@@ -1,4 +1,5 @@
 import { appendJSONL } from "../storage/jsonl-writer.js";
+import type { Config } from "../config.js";
 
 interface ChatInput {
   sessionID?: string;
@@ -31,8 +32,10 @@ export function handleChatMessage(
   projectId?: string,
   gitBranch?: string,
   skills?: string[],
+  config?: Config,
 ): void {
   const ts = timestamp ?? new Date().toISOString();
+  const includeThinking = config?.includeThinking ?? false;
 
   const parts = output.parts ?? [];
   const text = parts
@@ -64,7 +67,7 @@ export function handleChatMessage(
   } else {
     record.output = text;
   }
-  if (thinkingText) record.thinking = thinkingText;
+  if (includeThinking && thinkingText) record.thinking = thinkingText;
 
   appendJSONL(base, "session-logs", record);
 }
@@ -103,7 +106,9 @@ export function flushAssistantOutput(
   projectId?: string,
   gitBranch?: string,
   skills?: string[],
+  config?: Config,
 ): void {
+  const includeThinking = config?.includeThinking ?? false;
   const parts: PendingPart[] = [];
   for (const [id, p] of pendingParts) {
     if (p.messageID === msgId) {
@@ -137,7 +142,7 @@ export function flushAssistantOutput(
   if (finishReason) record.finish_reason = finishReason;
   if (error) record.error = error;
   if (cwd) record.cwd = cwd;
-  if (reasoning) record.thinking = reasoning;
+  if (includeThinking && reasoning) record.thinking = reasoning;
   if (skills) record.skills = skills;
 
   appendJSONL(base, "session-logs", record);
