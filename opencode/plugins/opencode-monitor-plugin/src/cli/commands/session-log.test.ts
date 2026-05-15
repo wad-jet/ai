@@ -4,6 +4,7 @@ import { rmSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { runSessionLogCLI } from "./session-log.js";
+import { createConfig } from "../../config.js";
 
 let testNum = 0;
 
@@ -74,7 +75,33 @@ describe("session-log filters", () => {
     assert.match(outputInput, /user input/);
     assert.ok(!outputInput.includes("ai output"), "ai output should not be in input-only view");
     
-    const outputThinking = runSessionLogCLI("view", { sessionId: "sess-1", field: "thinking" }, base);
+    const outputThinking = runSessionLogCLI("view", { sessionId: "sess-1", field: "thinking" }, base, createConfig({ includeThinking: true }));
     assert.match(outputThinking, /reasoning/);
+  });
+
+  it("should hide thinking when includeThinking is false", () => {
+    const base = freshDir();
+    writeSessionRecord(base, "2026-05-14", { timestamp: "2026-05-14T10:00:00.000Z", session_id: "sess-2", agent: "feature", input: "user input", output: "ai output", thinking: "reasoning data" });
+    
+    const config = createConfig({ includeThinking: false });
+    const output = runSessionLogCLI("view", { sessionId: "sess-2" }, base, config);
+    assert.ok(!output.includes("reasoning data"), "reasoning should be hidden when includeThinking is false");
+  });
+
+  it("should show thinking when includeThinking is true", () => {
+    const base = freshDir();
+    writeSessionRecord(base, "2026-05-14", { timestamp: "2026-05-14T10:00:00.000Z", session_id: "sess-3", agent: "feature", input: "user input", output: "ai output", thinking: "reasoning data" });
+    
+    const config = createConfig({ includeThinking: true });
+    const output = runSessionLogCLI("view", { sessionId: "sess-3" }, base, config);
+    assert.match(output, /reasoning data/, "reasoning should be shown when includeThinking is true");
+  });
+
+  it("should hide thinking with field='thinking' when config is undefined", () => {
+    const base = freshDir();
+    writeSessionRecord(base, "2026-05-14", { timestamp: "2026-05-14T10:00:00.000Z", session_id: "sess-4", agent: "feature", input: "user input", output: "ai output", thinking: "reasoning data" });
+    
+    const output = runSessionLogCLI("view", { sessionId: "sess-4", field: "thinking" }, base);
+    assert.ok(!output.includes("reasoning data"), "reasoning should be hidden by default when config is undefined");
   });
 });
