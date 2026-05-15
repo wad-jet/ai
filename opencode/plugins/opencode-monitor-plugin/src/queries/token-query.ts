@@ -42,6 +42,41 @@ export interface AgentRow {
   hits: number;
 }
 
+export interface DailyRow {
+  date: string;
+  input: number;
+  output: number;
+  reasoning: number;
+  cacheRead: number;
+  cacheWrite: number;
+  cost: number;
+  hits: number;
+}
+
+export function queryDailyBreakdown(base: string, _days: number): DailyRow[] {
+  const rows = readCSV(base, "token_status", COL_COUNT);
+  const map = new Map<string, DailyRow>();
+  for (const row of rows) {
+    const date = (row[COL.TS] ?? "").slice(0, 10);
+    if (!date) continue;
+    const entry = map.get(date) ?? { date, input: 0, output: 0, reasoning: 0, cacheRead: 0, cacheWrite: 0, cost: 0, hits: 0 };
+    entry.input += Number(row[COL.IN]) || 0;
+    entry.output += Number(row[COL.OUT]) || 0;
+    entry.reasoning += Number(row[COL.REASONING]) || 0;
+    entry.cacheRead += Number(row[COL.CACHE_R]) || 0;
+    entry.cacheWrite += Number(row[COL.CACHE_W]) || 0;
+    entry.cost += Number(row[COL.COST]) || 0;
+    entry.hits++;
+    map.set(date, entry);
+  }
+  for (const entry of map.values()) {
+    entry.cost = Math.round(entry.cost * 1e6) / 1e6;
+  }
+  const result = Array.from(map.values());
+  result.sort((a, b) => a.date.localeCompare(b.date));
+  return result;
+}
+
 export function queryAgentBreakdown(
   base: string,
   days: number,
