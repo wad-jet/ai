@@ -89,6 +89,13 @@ export function flushAssistantOutput(
   providerId?: string,
   modelId?: string,
   opencodeVersion?: string,
+  finishReason?: string,
+  mode?: string,
+  durationMs?: number,
+  error?: object,
+  cwd?: string,
+  projectId?: string,
+  gitBranch?: string,
 ): void {
   const parts: PendingPart[] = [];
   for (const [id, p] of pendingParts) {
@@ -116,6 +123,13 @@ export function flushAssistantOutput(
   if (providerId) record.provider_id = providerId;
   if (modelId) record.model_id = modelId;
   if (opencodeVersion) record.opencode_version = opencodeVersion;
+  if (finishReason) record.finish_reason = finishReason;
+  if (mode) record.mode = mode;
+  if (durationMs !== undefined) record.duration_ms = durationMs;
+  if (error) record.error = error;
+  if (cwd) record.cwd = cwd;
+  if (projectId) record.project_id = projectId;
+  if (gitBranch) record.git_branch = gitBranch;
   if (reasoning) record.thinking = reasoning;
 
   appendJSONL(base, "session-logs", record);

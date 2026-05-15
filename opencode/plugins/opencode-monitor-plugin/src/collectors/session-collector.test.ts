@@ -154,6 +154,43 @@ describe("session-collector", () => {
     assert.equal(last.username, undefined);
   });
 
+  it("should include finish_reason in flushed output", () => {
+    const textPart = { properties: { part: { id: "p-fr", type: "text", text: "out", messageID: "msg-fr", time: { end: 1 } } } };
+    handlePartUpdate(BASE, textPart as any);
+
+    flushAssistantOutput(BASE, "msg-fr", "sess-fr", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, undefined, undefined, undefined, "stop", "agent", 1234, undefined, "/home/user/proj", "proj-1", "main");
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.equal(last.finish_reason, "stop");
+    assert.equal(last.mode, "agent");
+    assert.equal(last.duration_ms, 1234);
+    assert.equal(last.cwd, "/home/user/proj");
+  });
+
+  it("should include error in flushed output", () => {
+    const textPart = { properties: { part: { id: "p-err", type: "text", text: "out", messageID: "msg-err", time: { end: 1 } } } };
+    handlePartUpdate(BASE, textPart as any);
+
+    flushAssistantOutput(BASE, "msg-err", "sess-err", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, { type: "api_error", message: "timeout" });
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.deepEqual(last.error, { type: "api_error", message: "timeout" });
+  });
+
+  it("should include project_id and git_branch in flushed output", () => {
+    const textPart = { properties: { part: { id: "p-pg", type: "text", text: "out", messageID: "msg-pg", time: { end: 1 } } } };
+    handlePartUpdate(BASE, textPart as any);
+
+    flushAssistantOutput(BASE, "msg-pg", "sess-pg", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, "proj-1", "main");
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.equal(last.project_id, "proj-1");
+    assert.equal(last.git_branch, "main");
+  });
+
   it("should include model info and opencode version in chat message records", () => {
     const input = { sessionID: "sess-model", agent: "default" };
     const output = { message: { role: "user" }, parts: [{ type: "text", text: "hi" }] };
