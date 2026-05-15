@@ -5,10 +5,17 @@ interface LogFilters {
   sessionId?: string;
   searchText?: string;
   date?: string;
+  // New filters
+  since?: string;
+  until?: string;
+  agent?: string;
+  field?: "input" | "output" | "thinking" | "all";
+  tail?: number;
+  error?: boolean;
 }
 
-export function runSessionLogCLI(action: string, filters: LogFilters): string {
-  const base = getDataDir();
+export function runSessionLogCLI(action: string, filters: LogFilters, basePath?: string): string {
+  const base = basePath ?? getDataDir();
   const lines: string[] = [];
 
   if (action === "list") {
