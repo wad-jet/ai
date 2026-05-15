@@ -5,7 +5,7 @@
 ## Возможности
 
 - **Статистика токенов** — сбор и агрегация входящих/исходящих токенов, reasoning tokens, cache read/write, стоимости
-- **Лог сессий** — запись input/output модели, цепочек рассуждений (thinking), метаданных (finish_reason, duration_ms, mode, error, cwd), project_id, git_branch и применённых скилов
+- **Лог сессий** — запись input/output модели, цепочек рассуждений (thinking), метаданных (finish_reason: `stop`/`tool-calls`, duration_ms, mode, error, cwd), project_id, git_branch и применённых скилов
 - **Slash-команда `/token-status`** — запрос статистики прямо из диалога с AI
 - **CLI** — запрос статистики и очистка данных из терминала
 
@@ -149,7 +149,7 @@ timestamp,agent,session_id,provider_id,model_id,input_tokens,output_tokens,reaso
 | `thinking` | string | Цепочка рассуждений (опционально) |
 | `mode` | string | Режим: `agent`/`chat` (только assistant, опционально) |
 | `duration_ms` | number | Длительность ответа в мс (только assistant, опционально) |
-| `finish_reason` | string | Причина завершения: `stop`/`length`/`error`/`tool_use` (только assistant, опционально) |
+| `finish_reason` | string | Причина завершения ассистента: `stop` (завершён естественно), `tool-calls` (были вызваны инструменты) (только assistant, опционально) |
 | `error` | object | Объект ошибки (только assistant, опционально) |
 | `cwd` | string | Рабочая директория (только assistant, опционально) |
 | `skills` | string[] | Список вызванных скилов (только assistant, опционально) |
