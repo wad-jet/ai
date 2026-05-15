@@ -48,7 +48,7 @@ const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
     gitBranch = execSync("git rev-parse --abbrev-ref HEAD", { encoding: "utf-8" }).trim();
   } catch {}
 
-  const config = createConfig(input.config as Partial<Config>);
+  const config = createConfig((input as any).config as Partial<Config>);
 
   return {
     event: async ({ event }) => {
