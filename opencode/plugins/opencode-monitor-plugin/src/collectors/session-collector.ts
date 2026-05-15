@@ -28,6 +28,9 @@ export function handleChatMessage(
   providerId?: string,
   modelId?: string,
   opencodeVersion?: string,
+  projectId?: string,
+  gitBranch?: string,
+  skills?: string[],
 ): void {
   const ts = timestamp ?? new Date().toISOString();
 
@@ -53,10 +56,13 @@ export function handleChatMessage(
   if (providerId) record.provider_id = providerId;
   if (modelId) record.model_id = modelId;
   if (opencodeVersion) record.opencode_version = opencodeVersion;
+  if (projectId) record.project_id = projectId;
+  if (gitBranch) record.git_branch = gitBranch;
   if (isUser) {
     record.input = text;
   } else {
     record.output = text;
+    if (skills) record.skills = skills;
   }
   if (thinkingText) record.thinking = thinkingText;
 

@@ -227,4 +227,30 @@ describe("session-collector", () => {
     assert.equal(last.model_id, "gpt-4");
     assert.equal(last.opencode_version, "1.15.0");
   });
+
+  it("should include project_id, git_branch and skills in chat message records", () => {
+    const input = { sessionID: "sess-meta", agent: "default" };
+    const output = { message: { role: "assistant" }, parts: [{ type: "text", text: "ok" }] };
+
+    handleChatMessage(BASE, input as any, output as any, undefined, undefined, undefined, "anthropic", "claude-3", "1.15.0", "proj-1", "main", ["test-driven-development", "writing-plans"]);
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.equal(last.project_id, "proj-1");
+    assert.equal(last.git_branch, "main");
+    assert.deepEqual(last.skills, ["test-driven-development", "writing-plans"]);
+  });
+
+  it("should not include skills for user messages", () => {
+    const input = { sessionID: "sess-user-skills", agent: "default" };
+    const output = { message: { role: "user" }, parts: [{ type: "text", text: "hello" }] };
+
+    handleChatMessage(BASE, input as any, output as any, undefined, undefined, undefined, undefined, undefined, undefined, "proj-1", "main", ["test-driven-development"]);
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.equal(last.project_id, "proj-1");
+    assert.equal(last.git_branch, "main");
+    assert.equal(last.skills, undefined);
+  });
 });
