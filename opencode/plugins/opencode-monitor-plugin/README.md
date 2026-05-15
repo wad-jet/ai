@@ -70,9 +70,17 @@ timestamp,agent,session_id,provider_id,model_id,input_tokens,output_tokens,reaso
   "session_id": "58a91aab-63d2-4e12-ab4e-ca3342260b0f",
   "username": "odemidov",
   "root_dir": "/Users/user/projects/my-app",
+  "project_id": "proj_abc123",
+  "git_branch": "feature/monitor",
   "provider_id": "opencode",
   "model_id": "big-pickle",
   "opencode_version": "1.15.0",
+  "mode": "agent",
+  "finish_reason": "stop",
+  "duration_ms": 4523,
+  "cwd": "/Users/user/projects/my-app/src",
+  "error": { "type": "api_error", "message": "timeout" },
+  "skills": ["test-driven-development", "writing-plans"],
   "input": "текст запроса пользователя",
   "output": "ответ модели в markdown",
   "thinking": "цепочка рассуждений модели (опционально)"
@@ -86,9 +94,17 @@ timestamp,agent,session_id,provider_id,model_id,input_tokens,output_tokens,reaso
 | `session_id` | string | ID сессии |
 | `username` | string | Системное имя пользователя (из `os.userInfo()`) |
 | `root_dir` | string | Путь к корневой папке проекта (опционально) |
+| `project_id` | string | ID проекта (из `input.project.id`, опционально) |
+| `git_branch` | string | Текущая ветка git (из `git rev-parse --abbrev-ref HEAD`, опционально) |
 | `provider_id` | string | Провайдер модели (опционально) |
 | `model_id` | string | Модель (опционально) |
 | `opencode_version` | string | Версия OpenCode (из `opencode --version`) |
+| `mode` | string | Режим: agent/chat (только для assistant, опционально) |
+| `finish_reason` | string | Причина завершения: stop/length/error/tool_use (только для assistant, опционально) |
+| `duration_ms` | number | Длительность ответа в мс (только для assistant, опционально) |
+| `cwd` | string | Рабочая директория на момент запроса (только для assistant, опционально) |
+| `error` | object | Объект ошибки, если ответ завершился с ошибкой (опционально) |
+| `skills` | string[] | Список вызванных скилов (только для assistant, опционально) |
 | `input` | string | Текст запроса пользователя (только для user-сообщений) |
 | `output` | string | Текст ответа модели (только для assistant-сообщений) |
 | `thinking` | string | Цепочка рассуждений модели (только если есть) |
