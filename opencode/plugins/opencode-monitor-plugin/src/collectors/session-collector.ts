@@ -61,7 +61,9 @@ export function handleChatMessage(
   if (providerId) record.provider_id = providerId;
   if (modelId) record.model_id = modelId;
   if (opencodeVersion) record.opencode_version = opencodeVersion;
-  if (!isUser && skills) record.skills = skills;
+  if (!isUser && skills) {
+    record.skills = skills;
+  }
   if (isUser) {
     record.input = text;
   } else {
