@@ -98,4 +98,85 @@ describe("session-collector", () => {
     const last = records[records.length - 1];
     assert.notEqual(last.session_id, "sess-3");
   });
+
+  it("should include root_dir in chat message records", () => {
+    const input = { sessionID: "sess-root", agent: "default" };
+    const output = { message: { role: "user" }, parts: [{ type: "text", text: "hello" }] };
+
+    handleChatMessage(BASE, input as any, output as any, undefined, "/test/project");
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.equal(last.root_dir, "/test/project");
+  });
+
+  it("should include root_dir in flushed assistant output", () => {
+    const textPart = { properties: { part: { id: "p-root", type: "text", text: "output", messageID: "msg-root", time: { end: 1 } } } };
+    handlePartUpdate(BASE, textPart as any);
+
+    flushAssistantOutput(BASE, "msg-root", "sess-root", "agent", "2026-01-01T00:00:00.000Z", "/test/project");
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.equal(last.root_dir, "/test/project");
+  });
+
+  it("should include username in chat message records", () => {
+    const input = { sessionID: "sess-user", agent: "default" };
+    const output = { message: { role: "user" }, parts: [{ type: "text", text: "hello" }] };
+
+    handleChatMessage(BASE, input as any, output as any, undefined, undefined, "testuser");
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.equal(last.username, "testuser");
+  });
+
+  it("should include username in flushed assistant output", () => {
+    const textPart = { properties: { part: { id: "p-user", type: "text", text: "output", messageID: "msg-user", time: { end: 1 } } } };
+    handlePartUpdate(BASE, textPart as any);
+
+    flushAssistantOutput(BASE, "msg-user", "sess-user", "agent", "2026-01-01T00:00:00.000Z", undefined, "testuser");
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.equal(last.username, "testuser");
+  });
+
+  it("should not include username when not provided", () => {
+    const input = { sessionID: "sess-no-user", agent: "default" };
+    const output = { message: { role: "user" }, parts: [{ type: "text", text: "hello" }] };
+
+    handleChatMessage(BASE, input as any, output as any);
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.equal(last.username, undefined);
+  });
+
+  it("should include model info and opencode version in chat message records", () => {
+    const input = { sessionID: "sess-model", agent: "default" };
+    const output = { message: { role: "user" }, parts: [{ type: "text", text: "hi" }] };
+
+    handleChatMessage(BASE, input as any, output as any, undefined, undefined, undefined, "anthropic", "claude-3", "1.15.0");
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.equal(last.provider_id, "anthropic");
+    assert.equal(last.model_id, "claude-3");
+    assert.equal(last.opencode_version, "1.15.0");
+  });
+
+  it("should include model info and opencode version in flushed output", () => {
+    const textPart = { properties: { part: { id: "p-model", type: "text", text: "out", messageID: "msg-model", time: { end: 1 } } } };
+    handlePartUpdate(BASE, textPart as any);
+
+    flushAssistantOutput(BASE, "msg-model", "sess-model", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, "openai", "gpt-4", "1.15.0");
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.equal(last.provider_id, "openai");
+    assert.equal(last.model_id, "gpt-4");
+    assert.equal(last.opencode_version, "1.15.0");
+  });
 });

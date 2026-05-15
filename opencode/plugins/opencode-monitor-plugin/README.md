@@ -1,4 +1,4 @@
-# @opencode-ai/opencode-monitor-plugin
+# @opencode-dev/opencode-monitor-plugin
 
 Плагин для мониторинга использования токенов и логирования сессий в OpenCode.
 
@@ -15,36 +15,85 @@
 
 ```
 ~/.local/share/opencode/opencode-monitor-plugin/
-├── token_status/
+├── token_status/          # статистика использования токенов по дням
 │   ├── 2026-05-14.csv
+│   ├── 2026-05-15.csv
 │   └── ...
-└── session-logs/
+└── session-logs/          # логи запросов и ответов модели по дням
     ├── 2026-05-14.jsonl
+    ├── 2026-05-15.jsonl
     └── ...
 ```
 
-### token_status CSV
+Каждая директория внутри разбивает данные по дням (UTC). Один файл — все записи за одну дату.
+
+---
+
+### token_status/ — статистика токенов
+
+**Назначение:** сбор данных о потреблении токенов для последующей агрегации и расчёта стоимости.
+
+**Формат:** CSV без заголовка, одна строка — один `message.updated` event (один ответ модели).
 
 ```
 timestamp,agent,session_id,provider_id,model_id,input_tokens,output_tokens,reasoning_tokens,cache_read,cache_write,cost
 ```
 
-Файлы разбиваются по датам. Одна строка — один `message.updated` event (один ответ модели).
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `timestamp` | ISO 8601 | Время события |
+| `agent` | string | Имя агента (build, explore, feature и т.д.) |
+| `session_id` | string | ID сессии |
+| `provider_id` | string | Провайдер модели (opencode, anthropic, openai и т.д.) |
+| `model_id` | string | Модель (big-pickle, claude-sonnet-4, gpt-4o и т.д.) |
+| `input_tokens` | number | Входящие токены |
+| `output_tokens` | number | Исходящие токены |
+| `reasoning_tokens` | number | Токены цепочки рассуждений (thinking/reasoning) |
+| `cache_read` | number | Токены, прочитанные из кэша |
+| `cache_write` | number | Токены, записанные в кэш |
+| `cost` | number | Стоимость в долларах (0, если модель не имеет цены) |
 
-### session-logs JSONL
+**Коллектор:** hook `event` (событие `message.updated`). Записывается каждый чанк ответа модели, содержащий токены.
 
-Каждая строка — JSON:
+---
+
+### session-logs/ — логи сессий
+
+**Назначение:** запись полного текста запросов пользователя и ответов модели для просмотра и поиска.
+
+**Формат:** JSONL (одна JSON-строка на запись).
 
 ```json
 {
   "timestamp": "2026-05-14T06:55:42.000Z",
-  "agent": "default",
-  "session_id": "58a91aab-...",
+  "agent": "feature",
+  "session_id": "58a91aab-63d2-4e12-ab4e-ca3342260b0f",
+  "username": "odemidov",
+  "root_dir": "/Users/user/projects/my-app",
+  "provider_id": "opencode",
+  "model_id": "big-pickle",
+  "opencode_version": "1.15.0",
   "input": "текст запроса пользователя",
   "output": "ответ модели в markdown",
-  "thinking": "цепочка рассуждений"
+  "thinking": "цепочка рассуждений модели (опционально)"
 }
 ```
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `timestamp` | ISO 8601 | Время сообщения |
+| `agent` | string | Имя агента, отправившего сообщение |
+| `session_id` | string | ID сессии |
+| `username` | string | Системное имя пользователя (из `os.userInfo()`) |
+| `root_dir` | string | Путь к корневой папке проекта (опционально) |
+| `provider_id` | string | Провайдер модели (опционально) |
+| `model_id` | string | Модель (опционально) |
+| `opencode_version` | string | Версия OpenCode (из `opencode --version`) |
+| `input` | string | Текст запроса пользователя (только для user-сообщений) |
+| `output` | string | Текст ответа модели (только для assistant-сообщений) |
+| `thinking` | string | Цепочка рассуждений модели (только если есть) |
+
+**Коллектор:** hook `chat.message` для прямых сообщений и hook `event` (части `part`) для потокового сбора ответов. Для каждого обмена user → assistant создаётся две записи: одна с `input`, другая с `output`.
 
 ## Сборка
 
@@ -56,18 +105,12 @@ npm run build
 
 ## Подключение в OpenCode
 
-```bash
-cd opencode/plugins/opencode-monitor-plugin
-npm pack   # создаст .tgz
-npm install -g ./opencode-ai-opencode-monitor-plugin-0.1.0.tgz
-```
-
 Добавить в `opencode.json`:
 
 ```json
 {
   "plugin": [
-    "@opencode-ai/opencode-monitor-plugin"
+    "@opencode-dev/opencode-monitor-plugin"
   ]
 }
 ```

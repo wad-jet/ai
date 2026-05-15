@@ -1,5 +1,7 @@
 import type { PluginInput, Hooks } from "@opencode-ai/plugin";
 import { tool } from "@opencode-ai/plugin/tool";
+import { execSync } from "node:child_process";
+import { userInfo } from "node:os";
 import { getDataDir } from "./paths.js";
 import { handleTokenEvent } from "./collectors/token-collector.js";
 import { handleChatMessage, handlePartUpdate, flushAssistantOutput } from "./collectors/session-collector.js";
@@ -8,6 +10,12 @@ import { buildTokenStatusOutput } from "./tools/token-status.js";
 const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
   const base = getDataDir();
   const defaultAgent = (input.project as any)?.name ?? "unknown";
+  const rootDir = input.directory ?? "";
+  const username = userInfo().username;
+  let opencodeVersion = "";
+  try {
+    opencodeVersion = execSync("opencode --version", { encoding: "utf-8" }).trim();
+  } catch {}
 
   return {
     event: async ({ event }) => {
@@ -15,12 +23,13 @@ const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
       handlePartUpdate(base, event as any);
       const ev = event as any;
       if (ev.type === "message.updated" && ev.properties?.info?.role === "assistant" && ev.properties?.info?.tokens) {
-        flushAssistantOutput(base, ev.properties.info.id, ev.properties.info.sessionID, ev.properties.info.agent ?? defaultAgent);
+        flushAssistantOutput(base, ev.properties.info.id, ev.properties.info.sessionID, ev.properties.info.agent ?? defaultAgent, undefined, rootDir, username, ev.properties.info.providerID, ev.properties.info.modelID, opencodeVersion);
       }
     },
 
     "chat.message": async (inputMsg, output) => {
-      handleChatMessage(base, inputMsg as any, output as any);
+      const model = (inputMsg as any).model;
+      handleChatMessage(base, inputMsg as any, output as any, undefined, rootDir, username, model?.providerID, model?.modelID, opencodeVersion);
     },
 
     tool: {

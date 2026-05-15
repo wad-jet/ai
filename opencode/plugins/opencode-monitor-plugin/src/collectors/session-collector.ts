@@ -23,6 +23,11 @@ export function handleChatMessage(
   input: ChatInput,
   output: ChatOutput,
   timestamp?: string,
+  rootDir?: string,
+  username?: string,
+  providerId?: string,
+  modelId?: string,
+  opencodeVersion?: string,
 ): void {
   const ts = timestamp ?? new Date().toISOString();
 
@@ -43,6 +48,11 @@ export function handleChatMessage(
     agent: input.agent ?? "unknown",
     session_id: input.sessionID ?? "",
   };
+  if (rootDir) record.root_dir = rootDir;
+  if (username) record.username = username;
+  if (providerId) record.provider_id = providerId;
+  if (modelId) record.model_id = modelId;
+  if (opencodeVersion) record.opencode_version = opencodeVersion;
   if (isUser) {
     record.input = text;
   } else {
@@ -74,6 +84,11 @@ export function flushAssistantOutput(
   sessionId: string,
   agent: string,
   timestamp?: string,
+  rootDir?: string,
+  username?: string,
+  providerId?: string,
+  modelId?: string,
+  opencodeVersion?: string,
 ): void {
   const parts: PendingPart[] = [];
   for (const [id, p] of pendingParts) {
@@ -96,6 +111,11 @@ export function flushAssistantOutput(
     session_id: sessionId ?? "",
     output: text,
   };
+  if (rootDir) record.root_dir = rootDir;
+  if (username) record.username = username;
+  if (providerId) record.provider_id = providerId;
+  if (modelId) record.model_id = modelId;
+  if (opencodeVersion) record.opencode_version = opencodeVersion;
   if (reasoning) record.thinking = reasoning;
 
   appendJSONL(base, "session-logs", record);

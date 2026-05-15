@@ -1,5 +1,5 @@
 {
-  "name": "@opencode-ai/opencode-monitor-plugin",
+  "name": "@opencode-dev/opencode-monitor-plugin",
   "version": "0.1.0",
   "description": "OpenCode plugin for monitoring token usage and session logs",
   "type": "module",
@@ -18,7 +18,8 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "node --test 'dist/**/*.test.js'"
+    "test": "node --test 'dist/**/*.test.js'",
+    "monitor": "node dist/cli/index.js"
   },
   "dependencies": {
     "@opencode-ai/plugin": "1.14.41"

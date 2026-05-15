@@ -37,12 +37,12 @@ describe("integration: collector pipeline", () => {
       message: { role: "user" },
       parts: [{ type: "text", text: "hello" }],
     };
-    handleChatMessage(BASE, chatInput as any, chatUserOutput as any, ts);
+    handleChatMessage(BASE, chatInput as any, chatUserOutput as any, ts, "/test/project", "tester", "anthropic", "claude-3-opus", "1.15.0");
     const chatAssistantOutput = {
       message: { role: "assistant" },
       parts: [{ type: "text", text: "world" }, { type: "reasoning", text: "thinking..." }],
     };
-    handleChatMessage(BASE, chatInput as any, chatAssistantOutput as any, ts);
+    handleChatMessage(BASE, chatInput as any, chatAssistantOutput as any, ts, "/test/project", "tester", "anthropic", "claude-3-opus", "1.15.0");
 
     const tokenRows = readCSV(BASE, "token_status", 11);
     assert.equal(tokenRows.length, 1);
@@ -51,7 +51,17 @@ describe("integration: collector pipeline", () => {
     const logRecords = readJSONL(BASE, "session-logs") as any[];
     assert.equal(logRecords.length, 2);
     assert.equal(logRecords[0].input, "hello");
+    assert.equal(logRecords[0].root_dir, "/test/project");
+    assert.equal(logRecords[0].username, "tester");
+    assert.equal(logRecords[0].provider_id, "anthropic");
+    assert.equal(logRecords[0].model_id, "claude-3-opus");
+    assert.equal(logRecords[0].opencode_version, "1.15.0");
     assert.equal(logRecords[1].output, "world");
     assert.equal(logRecords[1].thinking, "thinking...");
+    assert.equal(logRecords[1].root_dir, "/test/project");
+    assert.equal(logRecords[1].username, "tester");
+    assert.equal(logRecords[1].provider_id, "anthropic");
+    assert.equal(logRecords[1].model_id, "claude-3-opus");
+    assert.equal(logRecords[1].opencode_version, "1.15.0");
   });
 });
