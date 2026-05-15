@@ -92,7 +92,7 @@ export function flushAssistantOutput(
   finishReason?: string,
   mode?: string,
   durationMs?: number,
-  error?: object,
+  error?: Record<string, unknown>,
   cwd?: string,
   projectId?: string,
   gitBranch?: string,

@@ -191,6 +191,17 @@ describe("session-collector", () => {
     assert.equal(last.git_branch, "main");
   });
 
+  it("should persist duration_ms=0 (not treat as falsy)", () => {
+    const textPart = { properties: { part: { id: "p-d0", type: "text", text: "out", messageID: "msg-d0", time: { end: 1 } } } };
+    handlePartUpdate(BASE, textPart as any);
+
+    flushAssistantOutput(BASE, "msg-d0", "sess-d0", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, 0);
+
+    const records = readJSONL(BASE, "session-logs") as any[];
+    const last = records[records.length - 1];
+    assert.equal(last.duration_ms, 0);
+  });
+
   it("should include model info and opencode version in chat message records", () => {
     const input = { sessionID: "sess-model", agent: "default" };
     const output = { message: { role: "user" }, parts: [{ type: "text", text: "hi" }] };
