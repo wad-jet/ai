@@ -37,8 +37,31 @@ export function runSessionLogCLI(action: string, filters: LogFilters, basePath?:
   }
 
   if (action === "view" && filters.sessionId) {
-    const records = readJSONL(base, "session-logs");
-    const sessionRecords = records.filter((r) => String(r.session_id) === filters.sessionId);
+    let sessionRecords = readJSONL(base, "session-logs")
+      .filter((r) => String(r.session_id) === filters.sessionId);
+    
+    // Apply filters
+    if (filters.date) {
+      sessionRecords = sessionRecords.filter((r) => String(r.timestamp).slice(0, 10) === filters.date);
+    }
+    if (filters.since) {
+      sessionRecords = sessionRecords.filter((r) => String(r.timestamp).slice(0, 10) >= String(filters.since));
+    }
+    if (filters.until) {
+      sessionRecords = sessionRecords.filter((r) => String(r.timestamp).slice(0, 10) <= String(filters.until));
+    }
+    if (filters.agent) {
+      sessionRecords = sessionRecords.filter((r) => String(r.agent) === filters.agent);
+    }
+    if (filters.error) {
+      sessionRecords = sessionRecords.filter((r) => r.error !== undefined && r.error !== null);
+    }
+    
+    // Apply tail after other filters
+    if (filters.tail && filters.tail > 0) {
+      sessionRecords = sessionRecords.slice(-filters.tail);
+    }
+    
     if (sessionRecords.length === 0) return `No logs found for session: ${filters.sessionId}`;
 
     for (const r of sessionRecords) {
@@ -46,17 +69,28 @@ export function runSessionLogCLI(action: string, filters: LogFilters, basePath?:
       lines.push(`Time:    ${r.timestamp}`);
       lines.push(`Agent:   ${r.agent}`);
       lines.push("");
-      lines.push("Input:");
-      lines.push(String(r.input ?? ""));
-      lines.push("");
-      lines.push("Output:");
-      lines.push(String(r.output ?? ""));
-      if (r.thinking) {
+      
+      // Filter output based on field selection (default to "all")
+      const field = filters.field ?? "all";
+      const showInput = field === "input" || field === "all";
+      const showOutput = field === "output" || field === "all";
+      const showThinking = (field === "thinking" || field === "all") && r.thinking;
+      
+      if (showInput) {
+        lines.push("Input:");
+        lines.push(String(r.input ?? ""));
         lines.push("");
+      }
+      if (showOutput) {
+        lines.push("Output:");
+        lines.push(String(r.output ?? ""));
+        lines.push("");
+      }
+      if (showThinking) {
         lines.push("Thinking:");
         lines.push(String(r.thinking));
+        lines.push("");
       }
-      lines.push("");
     }
     return lines.join("\n");
   }
