@@ -24,6 +24,39 @@
 - Логирует запросы/ответы через hook `chat.message`
 - Регистрирует slash-команду `/token-status` (копирует command-файл в `~/.config/opencode/command/`)
 
+### Конфигурация
+
+Плагин поддерживает опцию `includeThinking` для контроля сбора и отображения цепочек рассуждений (thinking/reasoning) модели:
+
+```json
+{
+  "plugin": ["./opencode/plugins/opencode-monitor-plugin/dist/index.js"],
+  "config": {
+    "includeThinking": false  // true = сохранять и отображать thinking, false (default) = игнорировать
+  }
+}
+```
+
+**Параметр конфигурации:**
+
+| Параметр | Тип | Описание | По умолчанию |
+|----------|-----|----------|--------------|
+| `includeThinking` | boolean | Включать ли сбор и отображение поля `thinking` (цепочка рассуждений) | `false` |
+
+**Поведение:**
+- `includeThinking: false` — thinking НЕ сохраняется в JSONL логи, команда `session-log --field thinking` не показывает thinking
+- `includeThinking: true` — thinking сохраняется и отображается при использовании `--field thinking` или `--field all`
+
+**Пример:**
+```json
+{
+  "plugin": ["./opencode/plugins/opencode-monitor-plugin/dist/index.js"],
+  "config": {
+    "includeThinking": true
+  }
+}
+```
+
 ### Зависимости
 
 ```bash
