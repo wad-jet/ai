@@ -48,21 +48,21 @@ export function handleChatMessage(
 
   const record: Record<string, unknown> = {
     timestamp: ts,
-    agent: input.agent ?? "unknown",
     session_id: input.sessionID ?? "",
+    agent: input.agent ?? "unknown",
   };
-  if (rootDir) record.root_dir = rootDir;
   if (username) record.username = username;
+  if (projectId) record.project_id = projectId;
+  if (gitBranch) record.git_branch = gitBranch;
+  if (rootDir) record.root_dir = rootDir;
   if (providerId) record.provider_id = providerId;
   if (modelId) record.model_id = modelId;
   if (opencodeVersion) record.opencode_version = opencodeVersion;
-  if (projectId) record.project_id = projectId;
-  if (gitBranch) record.git_branch = gitBranch;
+  if (!isUser && skills) record.skills = skills;
   if (isUser) {
     record.input = text;
   } else {
     record.output = text;
-    if (skills) record.skills = skills;
   }
   if (thinkingText) record.thinking = thinkingText;
 
@@ -102,6 +102,7 @@ export function flushAssistantOutput(
   cwd?: string,
   projectId?: string,
   gitBranch?: string,
+  skills?: string[],
 ): void {
   const parts: PendingPart[] = [];
   for (const [id, p] of pendingParts) {
@@ -120,23 +121,24 @@ export function flushAssistantOutput(
   const ts = timestamp ?? new Date().toISOString();
   const record: Record<string, unknown> = {
     timestamp: ts,
-    agent: agent ?? "unknown",
     session_id: sessionId ?? "",
-    output: text,
+    agent: agent ?? "unknown",
   };
-  if (rootDir) record.root_dir = rootDir;
   if (username) record.username = username;
+  if (projectId) record.project_id = projectId;
+  if (gitBranch) record.git_branch = gitBranch;
+  if (rootDir) record.root_dir = rootDir;
   if (providerId) record.provider_id = providerId;
   if (modelId) record.model_id = modelId;
   if (opencodeVersion) record.opencode_version = opencodeVersion;
-  if (finishReason) record.finish_reason = finishReason;
+  record.output = text;
   if (mode) record.mode = mode;
   if (durationMs !== undefined) record.duration_ms = durationMs;
+  if (finishReason) record.finish_reason = finishReason;
   if (error) record.error = error;
   if (cwd) record.cwd = cwd;
-  if (projectId) record.project_id = projectId;
-  if (gitBranch) record.git_branch = gitBranch;
   if (reasoning) record.thinking = reasoning;
+  if (skills) record.skills = skills;
 
   appendJSONL(base, "session-logs", record);
 }
