@@ -239,11 +239,19 @@ opencode-monitor token-status --trend-days=30 --agent-view=initiator --agent-sor
 
 ### session-log — просмотр логов сессий
 
-Команда для чтения сохранённых JSONL-логов. Поддерживает три режима: просмотр по ID, список сессий, поиск по тексту.
+Команда для чтения сохранённых JSONL-логов. Поддерживает три режима: просмотр по ID (с фильтрами), список сессий, поиск по тексту.
 
 ```bash
 # Просмотр логов конкретной сессии
 opencode-monitor session-log <session-id>
+
+# Просмотр с фильтрами
+opencode-monitor session-log <session-id> --date 2026-05-14
+opencode-monitor session-log <session-id> --agent feature
+opencode-monitor session-log <session-id> --field output
+opencode-monitor session-log <session-id> --tail 5
+opencode-monitor session-log <session-id> --error
+opencode-monitor session-log <session-id> --since 2026-05-14 --until 2026-05-15
 
 # Список всех доступных сессий (с датами)
 opencode-monitor session-log list
@@ -251,6 +259,18 @@ opencode-monitor session-log list
 # Поиск по содержимому логов
 opencode-monitor session-log search "ошибка авторизации"
 ```
+
+**Параметры просмотра (`--date`, `--since`, `--until`, `--agent`, `--field`, `--tail`, `--error`):**
+
+| Параметр | Тип | Описание | По умолчанию |
+|----------|-----|----------|--------------|
+| `--date` | YYYY-MM-DD | Только записи за указанную дату (по `timestamp`) | — |
+| `--since` | YYYY-MM-DD | Начиная с даты (включительно) | — |
+| `--until` | YYYY-MM-DD | Заканчивая датой (включительно) | — |
+| `--agent` | string | Фильтр по имени агента (`feature`, `explore` и т.д.) | — |
+| `--field` | `input`/`output`/`thinking`/`all` | Какие поля показывать | `all` |
+| `--tail` | number | Последние N запросов в сессии | все |
+| `--error` | boolean | Только записи с ошибками (поле `error` не пусто) | `false` |
 
 **Режимы:**
 

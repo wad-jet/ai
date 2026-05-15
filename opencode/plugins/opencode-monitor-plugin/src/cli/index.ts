@@ -2,6 +2,7 @@
 import { runTokenStatusCLI } from "./commands/token-status.js";
 import { runSessionLogCLI } from "./commands/session-log.js";
 import { runCleanupCLI } from "./commands/cleanup.js";
+import { getDataDir } from "../paths.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -26,21 +27,34 @@ function parseArgs(args: string[]): Record<string, string | boolean | number | u
 }
 
 async function main(): Promise<void> {
+  const base = getDataDir();
   switch (command) {
     case "token-status":
       console.log(runTokenStatusCLI(parseArgs(args)));
       break;
     case "session-log": {
       const sub = args[1];
+      const opts = parseArgs(args);
+      
       if (sub === "list") {
-        console.log(runSessionLogCLI("list", {}));
+        console.log(runSessionLogCLI("list", {}, base));
       } else if (sub === "search") {
         const text = args.slice(2).join(" ");
-        console.log(runSessionLogCLI("search", { searchText: text }));
+        console.log(runSessionLogCLI("search", { searchText: text }, base));
       } else if (sub) {
-        console.log(runSessionLogCLI("view", { sessionId: sub }));
+        const filters = {
+          sessionId: sub,
+          date: opts.date as string | undefined,
+          since: opts.since as string | undefined,
+          until: opts.until as string | undefined,
+          agent: opts.agent as string | undefined,
+          field: (opts.field as "input" | "output" | "thinking" | "all") || "all",
+          tail: opts.tail as number | undefined,
+          error: opts.error === true,
+        };
+        console.log(runSessionLogCLI("view", filters, base));
       } else {
-        console.log(runSessionLogCLI("help", {}));
+        console.log(runSessionLogCLI("help", {}, base));
       }
       break;
     }
@@ -63,7 +77,7 @@ async function main(): Promise<void> {
     default:
       console.log(`Usage:
   opencode-monitor token-status [options]
-  opencode-monitor session-log <session-id>
+  opencode-monitor session-log <session-id> [options]
   opencode-monitor session-log list
   opencode-monitor session-log search <text>
   opencode-monitor cleanup --days <N> [--session-logs] [--token-status] [--dry-run]
@@ -78,6 +92,15 @@ Options for token-status:
   --scope <scope>       project|all
   --compact             Skip heavy tables
   --debug               Debug info
+
+Options for session-log:
+  --date <YYYY-MM-DD>   Filter by specific date
+  --since <YYYY-MM-DD>  Filter from date (inclusive)
+  --until <YYYY-MM-DD>  Filter until date (inclusive)
+  --agent <name>        Filter by agent name
+  --field <field>       Field to show: input|output|thinking|all
+  --tail <N>            Show last N records
+  --error               Show only records with errors
 
 Options for cleanup:
   --days <N>            Delete data older than N days (required)
