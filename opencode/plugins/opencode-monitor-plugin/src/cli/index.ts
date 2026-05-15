@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { runTokenStatusCLI } from "./commands/token-status.js";
 import { runSessionLogCLI } from "./commands/session-log.js";
+import { runCleanupCLI } from "./commands/cleanup.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -24,7 +25,7 @@ function parseArgs(args: string[]): Record<string, string | boolean | number | u
   return parsed;
 }
 
-function main(): void {
+async function main(): Promise<void> {
   switch (command) {
     case "token-status":
       console.log(runTokenStatusCLI(parseArgs(args)));
@@ -43,12 +44,29 @@ function main(): void {
       }
       break;
     }
+    case "cleanup": {
+      const opts = parseArgs(args);
+      const days = Number(opts["days"] ?? NaN);
+      if (isNaN(days) || days < 0) {
+        console.log("Error: --days must be a non-negative number.");
+        return;
+      }
+      const result = await runCleanupCLI({
+        days,
+        sessionLogs: opts["session-logs"] === true,
+        tokenStatus: opts["token-status"] === true,
+        dryRun: opts["dry-run"] === true,
+      });
+      console.log(result);
+      break;
+    }
     default:
       console.log(`Usage:
   opencode-monitor token-status [options]
   opencode-monitor session-log <session-id>
   opencode-monitor session-log list
   opencode-monitor session-log search <text>
+  opencode-monitor cleanup --days <N> [--session-logs] [--token-status] [--dry-run]
 
 Options for token-status:
   --session-id <id>     Session ID to inspect
@@ -59,8 +77,14 @@ Options for token-status:
   --trend-days <n>      Days for trend analysis
   --scope <scope>       project|all
   --compact             Skip heavy tables
-  --debug               Debug info`);
+  --debug               Debug info
+
+Options for cleanup:
+  --days <N>            Delete data older than N days (required)
+  --session-logs        Delete only session logs
+  --token-status        Delete only token metrics
+  --dry-run             Preview without deleting`);
   }
 }
 
-main();
+main().catch(console.error);

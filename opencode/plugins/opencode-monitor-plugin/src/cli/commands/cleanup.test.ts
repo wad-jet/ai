@@ -3,7 +3,7 @@ import { strict as assert } from "node:assert";
 import { rmSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { collectCleanupFiles, formatCleanupPreview } from "./cleanup.js";
+import { collectCleanupFiles, formatCleanupPreview, runCleanupCLI } from "./cleanup.js";
 
 let testNum = 0;
 
@@ -59,6 +59,17 @@ describe("cleanup", () => {
     writeFileSync(join(dir, "notes.txt"), "test\n");
     const files = collectCleanupFiles(base, 30, ["session-logs"]);
     assert.equal(files.length, 0);
+  });
+
+  it("should return preview in dry-run mode without asking confirmation", async () => {
+    const base = freshDir();
+    touch(base, "session-logs", "2025-03-01");
+    const result = await runCleanupCLI(
+      { days: 1, sessionLogs: false, tokenStatus: false, dryRun: true },
+      base,
+    );
+    assert.match(result, /Files to delete/);
+    assert.match(result, /2025-03-01/);
   });
 
   it("should format preview with correct summary", () => {
