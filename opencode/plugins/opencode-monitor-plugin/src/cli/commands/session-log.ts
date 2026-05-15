@@ -1,5 +1,6 @@
 import { readJSONL } from "../../storage/jsonl-writer.js";
 import { getDataDir } from "../../paths.js";
+import type { Config } from "../../config.js";
 
 interface LogFilters {
   sessionId?: string;
@@ -14,8 +15,9 @@ interface LogFilters {
   error?: boolean;
 }
 
-export function runSessionLogCLI(action: string, filters: LogFilters, basePath?: string): string {
+export function runSessionLogCLI(action: string, filters: LogFilters, basePath?: string, config?: Config): string {
   const base = basePath ?? getDataDir();
+  const includeThinking = config?.includeThinking ?? false;
   const lines: string[] = [];
 
   if (action === "list") {
@@ -83,7 +85,7 @@ export function runSessionLogCLI(action: string, filters: LogFilters, basePath?:
       const field = filters.field ?? "all";
       const showInput = field === "input" || field === "all";
       const showOutput = field === "output" || field === "all";
-      const showThinking = (field === "thinking" || field === "all") && r.thinking;
+      const showThinking = includeThinking && (field === "thinking" || field === "all") && r.thinking;
       
       if (showInput) {
         lines.push("Input:");
