@@ -79,47 +79,48 @@ timestamp,agent,session_id,provider_id,model_id,input_tokens,output_tokens,reaso
 ```json
 {
   "timestamp": "2026-05-14T06:55:42.000Z",
-  "agent": "feature",
   "session_id": "58a91aab-63d2-4e12-ab4e-ca3342260b0f",
+  "agent": "feature",
   "username": "odemidov",
-  "root_dir": "/Users/user/projects/my-app",
   "project_id": "proj_abc123",
   "git_branch": "feature/monitor",
+  "root_dir": "/Users/user/projects/my-app",
   "provider_id": "opencode",
   "model_id": "big-pickle",
   "opencode_version": "1.15.0",
-  "mode": "agent",
-  "finish_reason": "stop",
-  "duration_ms": 4523,
-  "cwd": "/Users/user/projects/my-app/src",
-  "error": { "type": "api_error", "message": "timeout" },
-  "skills": ["test-driven-development", "writing-plans"],
   "input": "текст запроса пользователя",
   "output": "ответ модели в markdown",
-  "thinking": "цепочка рассуждений (опционально)"
+  "thinking": "цепочка рассуждений (опционально)",
+  "mode": "agent",
+  "duration_ms": 4523,
+  "finish_reason": "stop",
+  "error": { "type": "api_error", "message": "timeout" },
+  "cwd": "/Users/user/projects/my-app/src",
+  "skills": ["test-driven-development", "writing-plans"]
 }
 ```
 
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `timestamp` | ISO 8601 | Время сообщения |
-| `agent` | string | Имя агента |
 | `session_id` | string | ID сессии |
+| `agent` | string | Имя агента |
 | `username` | string | Системное имя пользователя (из `os.userInfo()`) |
-| `root_dir` | string | Путь к корню проекта |
 | `project_id` | string | ID проекта (из `input.project.id`, опционально) |
 | `git_branch` | string | Текущая ветка git (опционально) |
+| `root_dir` | string | Путь к корню проекта |
 | `provider_id` | string | Провайдер модели (опционально) |
 | `model_id` | string | Модель (опционально) |
 | `opencode_version` | string | Версия OpenCode |
-| `mode` | string | Режим: `agent`/`chat` (только assistant, опционально) |
-| `finish_reason` | string | Причина завершения: `stop`/`length`/`error`/`tool_use` (только assistant, опционально) |
-| `duration_ms` | number | Длительность ответа в мс (только assistant, опционально) |
-| `cwd` | string | Рабочая директория на момент запроса (только assistant, опционально) |
-| `error` | object | Объект ошибки (только assistant, опционально) |
-| `skills` | string[] | Список вызванных скилов (только assistant, опционально) |
 | `input` | string | Текст запроса пользователя (только user) |
 | `output` | string | Текст ответа модели (только assistant) |
+| `thinking` | string | Цепочка рассуждений (опционально) |
+| `mode` | string | Режим: `agent`/`chat` (только assistant, опционально) |
+| `duration_ms` | number | Длительность ответа в мс (только assistant, опционально) |
+| `finish_reason` | string | Причина завершения: `stop`/`length`/`error`/`tool_use` (только assistant, опционально) |
+| `error` | object | Объект ошибки (только assistant, опционально) |
+| `cwd` | string | Рабочая директория (только assistant, опционально) |
+| `skills` | string[] | Список вызванных скилов (только assistant, опционально) |
 | `thinking` | string | Цепочка рассуждений модели (опционально) |
 
 ## Использование
