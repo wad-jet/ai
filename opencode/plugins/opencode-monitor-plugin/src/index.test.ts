@@ -37,12 +37,12 @@ describe("integration: collector pipeline", () => {
       message: { role: "user" },
       parts: [{ type: "text", text: "hello" }],
     };
-    handleChatMessage(BASE, chatInput as any, chatUserOutput as any, ts, "/test/project", "tester", "anthropic", "claude-3-opus", "1.15.0");
+    handleChatMessage(BASE, chatInput as any, chatUserOutput as any, ts, "/test/project", "tester", "anthropic", "claude-3-opus", "1.15.0", "proj-1", "main", undefined);
     const chatAssistantOutput = {
       message: { role: "assistant" },
       parts: [{ type: "text", text: "world" }, { type: "reasoning", text: "thinking..." }],
     };
-    handleChatMessage(BASE, chatInput as any, chatAssistantOutput as any, ts, "/test/project", "tester", "anthropic", "claude-3-opus", "1.15.0");
+    handleChatMessage(BASE, chatInput as any, chatAssistantOutput as any, ts, "/test/project", "tester", "anthropic", "claude-3-opus", "1.15.0", "proj-1", "main", ["skill-a"]);
 
     const tokenRows = readCSV(BASE, "token_status", 11);
     assert.equal(tokenRows.length, 1);
@@ -63,5 +63,11 @@ describe("integration: collector pipeline", () => {
     assert.equal(logRecords[1].provider_id, "anthropic");
     assert.equal(logRecords[1].model_id, "claude-3-opus");
     assert.equal(logRecords[1].opencode_version, "1.15.0");
+    assert.equal(logRecords[0].project_id, "proj-1");
+    assert.equal(logRecords[0].git_branch, "main");
+    assert.equal(logRecords[0].skills, undefined);
+    assert.equal(logRecords[1].project_id, "proj-1");
+    assert.equal(logRecords[1].git_branch, "main");
+    assert.deepEqual(logRecords[1].skills, ["skill-a"]);
   });
 });

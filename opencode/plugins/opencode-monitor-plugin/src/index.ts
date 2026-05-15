@@ -17,19 +17,37 @@ const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
     opencodeVersion = execSync("opencode --version", { encoding: "utf-8" }).trim();
   } catch {}
 
+  const projectId = (input.project as any)?.id ?? "";
+  let gitBranch = "";
+  try {
+    gitBranch = execSync("git rev-parse --abbrev-ref HEAD", { encoding: "utf-8" }).trim();
+  } catch {}
+
   return {
     event: async ({ event }) => {
       handleTokenEvent(base, event as any);
       handlePartUpdate(base, event as any);
       const ev = event as any;
       if (ev.type === "message.updated" && ev.properties?.info?.role === "assistant" && ev.properties?.info?.tokens) {
-        flushAssistantOutput(base, ev.properties.info.id, ev.properties.info.sessionID, ev.properties.info.agent ?? defaultAgent, undefined, rootDir, username, ev.properties.info.providerID, ev.properties.info.modelID, opencodeVersion);
+        const info = ev.properties.info;
+        const finishReason = info.finish;
+        const mode = info.mode;
+        const durationMs = info.time?.completed ? info.time.completed - info.time.created : undefined;
+        const error = info.error;
+        const cwd = info.path?.cwd;
+        flushAssistantOutput(base, info.id, info.sessionID, info.agent ?? defaultAgent, undefined, rootDir, username, info.providerID, info.modelID, opencodeVersion, finishReason, mode, durationMs, error, cwd, projectId, gitBranch);
       }
     },
 
     "chat.message": async (inputMsg, output) => {
       const model = (inputMsg as any).model;
-      handleChatMessage(base, inputMsg as any, output as any, undefined, rootDir, username, model?.providerID, model?.modelID, opencodeVersion);
+      const parts = (output as any).parts ?? [];
+      const skills = parts
+        .filter((p: any) => p.type === "tool")
+        .map((p: any) => p.tool)
+        .filter((t: string) => t);
+      const uniqueSkills = skills.length > 0 ? [...new Set(skills)] as string[] : undefined;
+      handleChatMessage(base, inputMsg as any, output as any, undefined, rootDir, username, model?.providerID, model?.modelID, opencodeVersion, projectId, gitBranch, uniqueSkills);
     },
 
     tool: {
