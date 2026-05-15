@@ -66,8 +66,17 @@ export function runSessionLogCLI(action: string, filters: LogFilters, basePath?:
 
     for (const r of sessionRecords) {
       lines.push("\u2500".repeat(60));
+      
+      // Metadata header
+      lines.push(`Session: ${r.session_id}`);
       lines.push(`Time:    ${r.timestamp}`);
       lines.push(`Agent:   ${r.agent}`);
+      if (r.username) lines.push(`User:    ${r.username}`);
+      if (r.provider_id) lines.push(`Model:   ${r.provider_id}/${r.model_id}`);
+      if (r.mode) lines.push(`Mode:    ${r.mode}`);
+      if (r.duration_ms !== undefined) lines.push(`Duration: ${r.duration_ms}ms`);
+      if (r.finish_reason) lines.push(`Finish:  ${r.finish_reason}`);
+      if (r.error) lines.push(`Error:   ${typeof r.error === 'object' ? JSON.stringify(r.error) : r.error}`);
       lines.push("");
       
       // Filter output based on field selection (default to "all")

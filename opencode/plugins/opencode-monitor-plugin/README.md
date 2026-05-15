@@ -88,14 +88,13 @@ timestamp,agent,session_id,provider_id,model_id,input_tokens,output_tokens,reaso
   "provider_id": "opencode",
   "model_id": "big-pickle",
   "opencode_version": "1.15.0",
-  "input": "текст запроса пользователя",
   "output": "ответ модели в markdown",
-  "thinking": "цепочка рассуждений (опционально)",
   "mode": "agent",
   "duration_ms": 4523,
   "finish_reason": "stop",
   "error": { "type": "api_error", "message": "timeout" },
   "cwd": "/Users/user/projects/my-app/src",
+  "thinking": "цепочка рассуждений (опционально)",
   "skills": ["test-driven-development", "writing-plans"]
 }
 ```
