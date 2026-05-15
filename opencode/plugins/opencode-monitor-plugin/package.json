@@ -1,6 +1,6 @@
 {
   "name": "@opencode-dev/opencode-monitor-plugin",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "OpenCode plugin for monitoring token usage and session logs",
   "type": "module",
   "main": "dist/index.js",
@@ -15,7 +15,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "commands/",
+    "skills/"
   ],
   "scripts": {
     "build": "tsc",
