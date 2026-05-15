@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { getDataDir } from "./paths.js";
 import { handleTokenEvent } from "./collectors/token-collector.js";
 import { handleChatMessage, handlePartUpdate, flushAssistantOutput } from "./collectors/session-collector.js";
+import { createConfig, type Config } from "./config.js";
 import { buildTokenStatusOutput } from "./tools/token-status.js";
 
 // Copy command files to OpenCode config so /token-status shows up in autocomplete
@@ -47,6 +48,8 @@ const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
     gitBranch = execSync("git rev-parse --abbrev-ref HEAD", { encoding: "utf-8" }).trim();
   } catch {}
 
+  const config = createConfig(input.config as Partial<Config>);
+
   return {
     event: async ({ event }) => {
       handleTokenEvent(base, event as any);
@@ -59,7 +62,7 @@ const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
         const durationMs = info.time?.completed != null && info.time?.created != null ? info.time.completed - info.time.created : undefined;
         const error = info.error;
         const cwd = info.path?.cwd;
-        flushAssistantOutput(base, info.id, info.sessionID, info.agent ?? defaultAgent, undefined, rootDir, username, info.providerID, info.modelID, opencodeVersion, finishReason, mode, durationMs, error, cwd, projectId, gitBranch);
+        flushAssistantOutput(base, info.id, info.sessionID, info.agent ?? defaultAgent, undefined, rootDir, username, info.providerID, info.modelID, opencodeVersion, finishReason, mode, durationMs, error, cwd, projectId, gitBranch, undefined, config);
       }
     },
 
@@ -71,7 +74,7 @@ const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
         .map((p: any) => p.tool)
         .filter((t: string) => t);
       const uniqueSkills = skills.length > 0 ? [...new Set(skills)] as string[] : undefined;
-      handleChatMessage(base, inputMsg as any, output as any, undefined, rootDir, username, model?.providerID, model?.modelID, opencodeVersion, projectId, gitBranch, uniqueSkills);
+      handleChatMessage(base, inputMsg as any, output as any, undefined, rootDir, username, model?.providerID, model?.modelID, opencodeVersion, projectId, gitBranch, uniqueSkills, config);
     },
 
     tool: {
