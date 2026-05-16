@@ -45,13 +45,22 @@ export function handleChatMessage(base, input, output, timestamp, rootDir, usern
         record.thinking = thinkingText;
     appendJSONL(base, "session-logs", record);
 }
+const PART_TTL_MS = 5 * 60 * 1000; // 5 minutes
 export function handlePartUpdate(base, event) {
     const part = event.properties?.part;
     if (!part?.type || !part.id || !part.messageID)
         return;
     if (!part.time?.end)
         return;
+    // Clean stale entries on each insert to prevent memory leak
+    const now = Date.now();
+    for (const [id, p] of pendingParts) {
+        if (p._ts && now - p._ts > PART_TTL_MS) {
+            pendingParts.delete(id);
+        }
+    }
     pendingParts.set(part.id, {
+        _ts: now,
         type: part.type,
         text: part.text ?? "",
         messageID: part.messageID,

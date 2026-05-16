@@ -1,7 +1,7 @@
 import type { PluginInput, Hooks } from "@opencode-ai/plugin";
 import { tool } from "@opencode-ai/plugin/tool";
 import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, copyFileSync } from "node:fs";
+import { existsSync, mkdirSync, copyFileSync, statSync } from "node:fs";
 import { userInfo, homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -20,7 +20,10 @@ function setupCommands(): void {
     const commandsDir = join(homedir(), ".config", "opencode", "command");
     const destCmd = join(commandsDir, "token-status.md");
 
-    if (existsSync(srcCmd) && !existsSync(destCmd)) {
+    const srcSize = statSync(srcCmd).size;
+
+    // Copy if destination doesn't exist or size differs (content changed)
+    if (!existsSync(destCmd) || statSync(destCmd).size !== srcSize) {
       mkdirSync(commandsDir, { recursive: true });
       copyFileSync(srcCmd, destCmd);
     }
@@ -52,29 +55,37 @@ const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
 
   return {
     event: async ({ event }) => {
-      handleTokenEvent(base, event as any);
-      handlePartUpdate(base, event as any);
-      const ev = event as any;
-      if (ev.type === "message.updated" && ev.properties?.info?.role === "assistant" && ev.properties?.info?.tokens) {
-        const info = ev.properties.info;
-        const finishReason = info.finish;
-        const mode = info.mode;
-        const durationMs = info.time?.completed != null && info.time?.created != null ? info.time.completed - info.time.created : undefined;
-        const error = info.error;
-        const cwd = info.path?.cwd;
-        flushAssistantOutput(base, info.id, info.sessionID, info.agent ?? defaultAgent, undefined, rootDir, username, info.providerID, info.modelID, opencodeVersion, finishReason, mode, durationMs, error, cwd, projectId, gitBranch, undefined, config);
+      try {
+        handleTokenEvent(base, event as any);
+        handlePartUpdate(base, event as any);
+        const ev = event as any;
+        if (ev.type === "message.updated" && ev.properties?.info?.role === "assistant" && ev.properties?.info?.tokens) {
+          const info = ev.properties.info;
+          const finishReason = info.finish;
+          const mode = info.mode;
+          const durationMs = info.time?.completed != null && info.time?.created != null ? info.time.completed - info.time.created : undefined;
+          const error = info.error;
+          const cwd = info.path?.cwd;
+          flushAssistantOutput(base, info.id, info.sessionID, info.agent ?? defaultAgent, undefined, rootDir, username, info.providerID, info.modelID, opencodeVersion, finishReason, mode, durationMs, error, cwd, projectId, gitBranch, undefined, config);
+        }
+      } catch (err) {
+        console.error("[opencode-monitor-plugin] event hook error:", err);
       }
     },
 
     "chat.message": async (inputMsg, output) => {
-      const model = (inputMsg as any).model;
-      const parts = (output as any).parts ?? [];
-      const skills = parts
-        .filter((p: any) => p.type === "tool")
-        .map((p: any) => p.tool)
-        .filter((t: string) => t);
-      const uniqueSkills = skills.length > 0 ? [...new Set(skills)] as string[] : undefined;
-      handleChatMessage(base, inputMsg as any, output as any, undefined, rootDir, username, model?.providerID, model?.modelID, opencodeVersion, projectId, gitBranch, uniqueSkills, config);
+      try {
+        const model = (inputMsg as any).model;
+        const parts = (output as any).parts ?? [];
+        const skills = parts
+          .filter((p: any) => p.type === "tool")
+          .map((p: any) => p.tool)
+          .filter((t: string) => t);
+        const uniqueSkills = skills.length > 0 ? [...new Set(skills)] as string[] : undefined;
+        handleChatMessage(base, inputMsg as any, output as any, undefined, rootDir, username, model?.providerID, model?.modelID, opencodeVersion, projectId, gitBranch, uniqueSkills, config);
+      } catch (err) {
+        console.error("[opencode-monitor-plugin] chat.message hook error:", err);
+      }
     },
 
     tool: {
