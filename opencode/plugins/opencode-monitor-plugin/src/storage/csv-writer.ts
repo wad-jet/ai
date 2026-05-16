@@ -29,12 +29,14 @@ export function readCSV(
   baseDir: string,
   subdir: string,
   columnCount: number,
+  maxDays?: number,
 ): string[][] {
   const dir = join(baseDir, subdir);
   if (!existsSync(dir)) return [];
   const files = readdirSync(dir).filter((f) => f.endsWith(".csv")).sort();
+  const recent = maxDays ? files.slice(-maxDays) : files;
   const rows: string[][] = [];
-  for (const file of files) {
+  for (const file of recent) {
     const content = readFileSync(join(dir, file), "utf-8");
     for (const line of content.trim().split("\n")) {
       if (!line) continue;

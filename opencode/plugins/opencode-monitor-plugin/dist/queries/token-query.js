@@ -5,7 +5,7 @@ const COL = {
     IN: 5, OUT: 6, REASONING: 7, CACHE_R: 8, CACHE_W: 9, COST: 10,
 };
 export function queryTokenSummary(base, days) {
-    const rows = readCSV(base, "token-status", COL_COUNT);
+    const rows = readCSV(base, "token-status", COL_COUNT, days);
     const summary = {
         totalInput: 0, totalOutput: 0, totalReasoning: 0,
         totalCacheRead: 0, totalCacheWrite: 0, totalCost: 0, totalRows: rows.length,
@@ -21,8 +21,8 @@ export function queryTokenSummary(base, days) {
     summary.totalCost = Math.round(summary.totalCost * 1e6) / 1e6;
     return summary;
 }
-export function queryDailyBreakdown(base, _days) {
-    const rows = readCSV(base, "token-status", COL_COUNT);
+export function queryDailyBreakdown(base, days) {
+    const rows = readCSV(base, "token-status", COL_COUNT, days);
     const map = new Map();
     for (const row of rows) {
         const date = (row[COL.TS] ?? "").slice(0, 10);
@@ -46,7 +46,7 @@ export function queryDailyBreakdown(base, _days) {
     return result;
 }
 export function queryAgentBreakdown(base, days, sortBy, topN) {
-    const rows = readCSV(base, "token-status", COL_COUNT);
+    const rows = readCSV(base, "token-status", COL_COUNT, days);
     const map = new Map();
     for (const row of rows) {
         const agent = row[COL.AGENT] || "unknown";

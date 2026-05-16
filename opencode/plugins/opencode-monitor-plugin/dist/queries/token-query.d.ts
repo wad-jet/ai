@@ -25,6 +25,6 @@ export interface DailyRow {
     cost: number;
     hits: number;
 }
-export declare function queryDailyBreakdown(base: string, _days: number): DailyRow[];
+export declare function queryDailyBreakdown(base: string, days: number): DailyRow[];
 export declare function queryAgentBreakdown(base: string, days: number, sortBy: "cost" | "tokens", topN: number): AgentRow[];
 //# sourceMappingURL=token-query.d.ts.map
