@@ -58,7 +58,7 @@ describe("session-collector", () => {
         };
         handleChatMessage(BASE, {}, output, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_DISABLED);
         const records = readJSONL(BASE, "session-logs");
-        assert.equal(records.length, 4);
+        assert.equal(records.length, 3);
         // Last record should not have thinking
         const lastRecord = records[records.length - 1];
         assert.equal(lastRecord.thinking, undefined);
@@ -68,7 +68,7 @@ describe("session-collector", () => {
         const REASON_PART = { properties: { part: { id: "p-accum-2", type: "reasoning", text: "thinking...", messageID: "msg-accum", time: { end: 2 } } } };
         handlePartUpdate(BASE, TEXT_PART);
         handlePartUpdate(BASE, REASON_PART);
-        flushAssistantOutput(BASE, "msg-accum", "sess-accum", "agent", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_ENABLED);
+        flushAssistantOutput(BASE, "msg-accum", "sess-accum", "agent", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_ENABLED);
         const records = readJSONL(BASE, "session-logs");
         const record = records.find((r) => r.session_id === "sess-accum");
         assert.ok(record !== undefined, "record should exist");
@@ -254,7 +254,7 @@ describe("session-collector with includeThinking", () => {
         const reasonPart = { properties: { part: { id: "p-thinking-2", type: "reasoning", text: "Thinking in flush", messageID: "msg-thinking-1", time: { end: 2 } } } };
         handlePartUpdate(BASE, textPart);
         handlePartUpdate(BASE, reasonPart);
-        flushAssistantOutput(BASE, "msg-thinking-1", "sess-thinking-1", "agent", "2026-01-01T00:03:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_ENABLED);
+        flushAssistantOutput(BASE, "msg-thinking-1", "sess-thinking-1", "agent", "2026-01-01T00:03:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_ENABLED);
         const records = readJSONL(BASE, "session-logs");
         const record = records.find((r) => r.session_id === "sess-thinking-1");
         assert.ok(record !== undefined);
@@ -266,7 +266,7 @@ describe("session-collector with includeThinking", () => {
         const reasonPart = { properties: { part: { id: "p-no-thinking-2", type: "reasoning", text: "Should be excluded", messageID: "msg-no-thinking", time: { end: 2 } } } };
         handlePartUpdate(BASE, textPart);
         handlePartUpdate(BASE, reasonPart);
-        flushAssistantOutput(BASE, "msg-no-thinking", "sess-no-thinking", "agent", "2026-01-01T00:04:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_DISABLED);
+        flushAssistantOutput(BASE, "msg-no-thinking", "sess-no-thinking", "agent", "2026-01-01T00:04:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_DISABLED);
         const records = readJSONL(BASE, "session-logs");
         const record = records.find((r) => r.session_id === "sess-no-thinking");
         assert.ok(record !== undefined);

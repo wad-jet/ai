@@ -65,7 +65,7 @@ describe("session-collector", () => {
 
     handleChatMessage(BASE, {} as any, output as any, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_DISABLED as any);
     const records = readJSONL(BASE, "session-logs") as any[];
-    assert.equal(records.length, 4);
+    assert.equal(records.length, 3);
     // Last record should not have thinking
     const lastRecord = records[records.length - 1];
     assert.equal(lastRecord.thinking, undefined);
@@ -78,7 +78,7 @@ describe("session-collector", () => {
     handlePartUpdate(BASE, TEXT_PART as any);
     handlePartUpdate(BASE, REASON_PART as any);
 
-    flushAssistantOutput(BASE, "msg-accum", "sess-accum", "agent", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_ENABLED as any);
+    flushAssistantOutput(BASE, "msg-accum", "sess-accum", "agent", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_ENABLED as any);
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const record = records.find((r) => r.session_id === "sess-accum");
@@ -357,7 +357,7 @@ describe("session-collector with includeThinking", () => {
 
     flushAssistantOutput(BASE, "msg-thinking-1", "sess-thinking-1", "agent", 
       "2026-01-01T00:03:00.000Z", undefined, undefined, undefined, undefined, undefined, 
-      undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
+      undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
       CONFIG_ENABLED as any,
     );
 
@@ -377,7 +377,7 @@ describe("session-collector with includeThinking", () => {
 
     flushAssistantOutput(BASE, "msg-no-thinking", "sess-no-thinking", "agent", 
       "2026-01-01T00:04:00.000Z", undefined, undefined, undefined, undefined, undefined, 
-      undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
+      undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
       CONFIG_DISABLED as any,
     );
 
