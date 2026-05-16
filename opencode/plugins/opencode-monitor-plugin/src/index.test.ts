@@ -37,12 +37,39 @@ describe("integration: collector pipeline", () => {
       message: { role: "user" },
       parts: [{ type: "text", text: "hello" }],
     };
-    handleChatMessage(BASE, chatInput as any, chatUserOutput as any, ts, "/test/project", "tester", "anthropic", "claude-3-opus", "1.15.0", "proj-1", "main", undefined, { includeThinking: true as const });
+    handleChatMessage({
+      base: BASE,
+      input: chatInput as any,
+      output: chatUserOutput as any,
+      timestamp: ts,
+      rootDir: "/test/project",
+      username: "tester",
+      providerId: "anthropic",
+      modelId: "claude-3-opus",
+      opencodeVersion: "1.15.0",
+      projectId: "proj-1",
+      gitBranch: "main",
+      config: { includeThinking: true as const },
+    });
     const chatAssistantOutput = {
       message: { role: "assistant" },
       parts: [{ type: "text", text: "world" }, { type: "reasoning", text: "thinking..." }],
     };
-    handleChatMessage(BASE, chatInput as any, chatAssistantOutput as any, ts, "/test/project", "tester", "anthropic", "claude-3-opus", "1.15.0", "proj-1", "main", ["skill-a"], { includeThinking: true as const });
+    handleChatMessage({
+      base: BASE,
+      input: chatInput as any,
+      output: chatAssistantOutput as any,
+      timestamp: ts,
+      rootDir: "/test/project",
+      username: "tester",
+      providerId: "anthropic",
+      modelId: "claude-3-opus",
+      opencodeVersion: "1.15.0",
+      projectId: "proj-1",
+      gitBranch: "main",
+      skills: ["skill-a"],
+      config: { includeThinking: true as const },
+    });
 
     const tokenRows = readCSV(BASE, "token-status", 11);
     assert.equal(tokenRows.length, 1);

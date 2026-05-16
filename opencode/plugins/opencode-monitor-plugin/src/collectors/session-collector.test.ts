@@ -25,7 +25,7 @@ describe("session-collector", () => {
       parts: [{ type: "text", text: "Hello" }],
     };
 
-    handleChatMessage(BASE, input as any, output as any);
+    handleChatMessage({ base: BASE, input: input as any, output: output as any });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     assert.equal(records.length, 1);
@@ -48,7 +48,12 @@ describe("session-collector", () => {
       ],
     };
 
-    handleChatMessage(BASE, input as any, output as any, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_ENABLED as any);
+    handleChatMessage({
+      base: BASE,
+      input: input as any,
+      output: output as any,
+      config: CONFIG_ENABLED as any,
+    });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     assert.equal(records.length, 2);
@@ -63,7 +68,12 @@ describe("session-collector", () => {
       parts: [{ type: "text", text: "response" }],
     };
 
-    handleChatMessage(BASE, {} as any, output as any, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_DISABLED as any);
+    handleChatMessage({
+      base: BASE,
+      input: {} as any,
+      output: output as any,
+      config: CONFIG_DISABLED as any,
+    });
     const records = readJSONL(BASE, "session-logs") as any[];
     assert.equal(records.length, 3);
     // Last record should not have thinking
@@ -108,7 +118,12 @@ describe("session-collector", () => {
     const input = { sessionID: "sess-root", agent: "default" };
     const output = { message: { role: "user" }, parts: [{ type: "text", text: "hello" }] };
 
-    handleChatMessage(BASE, input as any, output as any, undefined, "/test/project");
+    handleChatMessage({
+      base: BASE,
+      input: input as any,
+      output: output as any,
+      rootDir: "/test/project",
+    });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -130,7 +145,12 @@ describe("session-collector", () => {
     const input = { sessionID: "sess-user", agent: "default" };
     const output = { message: { role: "user" }, parts: [{ type: "text", text: "hello" }] };
 
-    handleChatMessage(BASE, input as any, output as any, undefined, undefined, "testuser");
+    handleChatMessage({
+      base: BASE,
+      input: input as any,
+      output: output as any,
+      username: "testuser",
+    });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -152,7 +172,7 @@ describe("session-collector", () => {
     const input = { sessionID: "sess-no-user", agent: "default" };
     const output = { message: { role: "user" }, parts: [{ type: "text", text: "hello" }] };
 
-    handleChatMessage(BASE, input as any, output as any);
+    handleChatMessage({ base: BASE, input: input as any, output: output as any });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -211,7 +231,14 @@ describe("session-collector", () => {
     const input = { sessionID: "sess-model", agent: "default" };
     const output = { message: { role: "user" }, parts: [{ type: "text", text: "hi" }] };
 
-    handleChatMessage(BASE, input as any, output as any, undefined, undefined, undefined, "anthropic", "claude-3", "1.15.0");
+    handleChatMessage({
+      base: BASE,
+      input: input as any,
+      output: output as any,
+      providerId: "anthropic",
+      modelId: "claude-3",
+      opencodeVersion: "1.15.0",
+    });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -237,7 +264,17 @@ describe("session-collector", () => {
     const input = { sessionID: "sess-meta", agent: "default" };
     const output = { message: { role: "assistant" }, parts: [{ type: "text", text: "ok" }] };
 
-    handleChatMessage(BASE, input as any, output as any, undefined, undefined, undefined, "anthropic", "claude-3", "1.15.0", "proj-1", "main", ["test-driven-development", "writing-plans"]);
+    handleChatMessage({
+      base: BASE,
+      input: input as any,
+      output: output as any,
+      providerId: "anthropic",
+      modelId: "claude-3",
+      opencodeVersion: "1.15.0",
+      projectId: "proj-1",
+      gitBranch: "main",
+      skills: ["test-driven-development", "writing-plans"],
+    });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -250,7 +287,14 @@ describe("session-collector", () => {
     const input = { sessionID: "sess-user-skills", agent: "default" };
     const output = { message: { role: "user" }, parts: [{ type: "text", text: "hello" }] };
 
-    handleChatMessage(BASE, input as any, output as any, undefined, undefined, undefined, undefined, undefined, undefined, "proj-1", "main", ["test-driven-development"]);
+    handleChatMessage({
+      base: BASE,
+      input: input as any,
+      output: output as any,
+      projectId: "proj-1",
+      gitBranch: "main",
+      skills: ["test-driven-development"],
+    });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -266,26 +310,19 @@ describe("session-collector with includeThinking", () => {
   const CONFIG_DISABLED = { includeThinking: false as const };
 
   it("should include reasoning when includeThinking is true", () => {
-    handleChatMessage(BASE, 
-      { sessionID: "test-session", agent: "test-agent" },
-      { 
+    handleChatMessage({
+      base: BASE,
+      input: { sessionID: "test-session", agent: "test-agent" },
+      output: {
         message: { role: "assistant" },
         parts: [
           { type: "text", text: "Hello world" },
-          { type: "reasoning", text: "Thinking process..." }
-        ]
+          { type: "reasoning", text: "Thinking process..." },
+        ],
       },
-      "2026-01-01T00:00:00.000Z",
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      CONFIG_ENABLED as any,
-    );
+      timestamp: "2026-01-01T00:00:00.000Z",
+      config: CONFIG_ENABLED as any,
+    });
 
     const records = readJSONL(BASE, "session-logs");
     const record = records.find((r) => r.session_id === "test-session");
@@ -294,26 +331,19 @@ describe("session-collector with includeThinking", () => {
   });
 
   it("should exclude reasoning when includeThinking is false", () => {
-    handleChatMessage(BASE,
-      { sessionID: "test-session-2", agent: "test-agent" },
-      {
+    handleChatMessage({
+      base: BASE,
+      input: { sessionID: "test-session-2", agent: "test-agent" },
+      output: {
         message: { role: "assistant" },
         parts: [
           { type: "text", text: "Hello again" },
-          { type: "reasoning", text: "More thinking" }
-        ]
+          { type: "reasoning", text: "More thinking" },
+        ],
       },
-      "2026-01-01T00:01:00.000Z",
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      CONFIG_DISABLED as any,
-    );
+      timestamp: "2026-01-01T00:01:00.000Z",
+      config: CONFIG_DISABLED as any,
+    });
 
     const records = readJSONL(BASE, "session-logs");
     const record = records.find((r) => r.session_id === "test-session-2");
@@ -322,26 +352,18 @@ describe("session-collector with includeThinking", () => {
   });
 
   it("should default to false when config is undefined", () => {
-    handleChatMessage(BASE,
-      { sessionID: "test-session-3", agent: "test-agent" },
-      {
+    handleChatMessage({
+      base: BASE,
+      input: { sessionID: "test-session-3", agent: "test-agent" },
+      output: {
         message: { role: "assistant" },
         parts: [
           { type: "text", text: "Test" },
-          { type: "reasoning", text: "Should be excluded" }
-        ]
+          { type: "reasoning", text: "Should be excluded" },
+        ],
       },
-      "2026-01-01T00:02:00.000Z",
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-    );
+      timestamp: "2026-01-01T00:02:00.000Z",
+    });
 
     const records = readJSONL(BASE, "session-logs");
     const record = records.find((r) => r.session_id === "test-session-3");
