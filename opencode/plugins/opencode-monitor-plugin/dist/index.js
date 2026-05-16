@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { getDataDir } from "./paths.js";
 import { handleTokenEvent } from "./collectors/token-collector.js";
 import { handleChatMessage, handlePartUpdate, flushAssistantOutput } from "./collectors/session-collector.js";
-import { createConfig } from "./config.js";
+import { loadPluginConfig } from "./config.js";
 import { buildTokenStatusOutput } from "./tools/token-status.js";
 // Copy command files to OpenCode config so /token-status shows up in autocomplete
 function setupCommands() {
@@ -44,7 +44,7 @@ const MonitorPlugin = async (input) => {
         gitBranch = execSync("git rev-parse --abbrev-ref HEAD", { encoding: "utf-8" }).trim();
     }
     catch { }
-    const config = createConfig(input.config);
+    const config = loadPluginConfig();
     return {
         event: async ({ event }) => {
             handleTokenEvent(base, event);
