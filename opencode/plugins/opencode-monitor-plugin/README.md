@@ -24,20 +24,23 @@
 - Логирует запросы/ответы через hook `chat.message`
 - Регистрирует slash-команду `/token-status` (копирует command-файл в `~/.config/opencode/command/`)
 
-### Конфигурация
+### Конфигурация плагина
 
-Плагин поддерживает опцию `includeThinking` для контроля сбора и отображения цепочек рассуждений (thinking/reasoning) модели:
+Конфигурация плагина задаётся в отдельном JSON-файле: `~/.config/opencode/opencode-monitor-plugin.json`
+
+Файл автоматически не создаётся — его нужно создать вручную при необходимости.
+
+#### Опция `includeThinking`
+
+Управляет сбором и отображением цепочек рассуждений (thinking/reasoning) модели.
 
 ```json
 {
-  "plugin": ["./opencode/plugins/opencode-monitor-plugin/dist/index.js"],
-  "config": {
-    "includeThinking": false  // true = сохранять и отображать thinking, false (default) = игнорировать
-  }
+  "includeThinking": true
 }
 ```
 
-**Параметр конфигурации:**
+**Параметр:**
 
 | Параметр | Тип | Описание | По умолчанию |
 |----------|-----|----------|--------------|
@@ -47,15 +50,7 @@
 - `includeThinking: false` — thinking НЕ сохраняется в JSONL логи, команда `session-log --field thinking` не показывает thinking
 - `includeThinking: true` — thinking сохраняется и отображается при использовании `--field thinking` или `--field all`
 
-**Пример:**
-```json
-{
-  "plugin": ["./opencode/plugins/opencode-monitor-plugin/dist/index.js"],
-  "config": {
-    "includeThinking": true
-  }
-}
-```
+> **Важно:** `includeThinking` — это опция именно плагина `opencode-monitor-plugin`. Она указывается в его собственном конфиг-файле, а не в `opencode.json`. На другие плагины или сам OpenCode она не влияет.
 
 ### Зависимости
 
