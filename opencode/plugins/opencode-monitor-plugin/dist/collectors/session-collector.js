@@ -66,7 +66,8 @@ export function handlePartUpdate(base, event) {
         messageID: part.messageID,
     });
 }
-export function flushAssistantOutput(base, msgId, sessionId, agent, timestamp, rootDir, username, providerId, modelId, opencodeVersion, finishReason, mode, durationMs, error, cwd, projectId, gitBranch, skills, config) {
+export function flushAssistantOutput(options) {
+    const { base, msgId, sessionId, agent, timestamp, rootDir, username, providerId, modelId, opencodeVersion, finishReason, mode, durationMs, error, cwd, projectId, gitBranch, skills, config, } = options;
     const includeThinking = config?.includeThinking ?? false;
     const parts = [];
     for (const [id, p] of pendingParts) {

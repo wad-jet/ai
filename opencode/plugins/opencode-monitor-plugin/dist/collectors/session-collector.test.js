@@ -68,7 +68,7 @@ describe("session-collector", () => {
         const REASON_PART = { properties: { part: { id: "p-accum-2", type: "reasoning", text: "thinking...", messageID: "msg-accum", time: { end: 2 } } } };
         handlePartUpdate(BASE, TEXT_PART);
         handlePartUpdate(BASE, REASON_PART);
-        flushAssistantOutput(BASE, "msg-accum", "sess-accum", "agent", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_ENABLED);
+        flushAssistantOutput({ base: BASE, msgId: "msg-accum", sessionId: "sess-accum", agent: "agent", config: CONFIG_ENABLED });
         const records = readJSONL(BASE, "session-logs");
         const record = records.find((r) => r.session_id === "sess-accum");
         assert.ok(record !== undefined, "record should exist");
@@ -78,14 +78,14 @@ describe("session-collector", () => {
     });
     it("should not flush if no parts accumulated", () => {
         const before = readJSONL(BASE, "session-logs").length;
-        flushAssistantOutput(BASE, "nonexistent", "sess-2", "agent", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_DISABLED);
+        flushAssistantOutput({ base: BASE, msgId: "nonexistent", sessionId: "sess-2", agent: "agent", config: CONFIG_DISABLED });
         const after = readJSONL(BASE, "session-logs").length;
         assert.equal(after, before);
     });
     it("should skip part without time.end", () => {
         const ev = { properties: { part: { id: "p3", type: "text", text: "incomplete", messageID: "msg-2" } } };
         handlePartUpdate(BASE, ev);
-        flushAssistantOutput(BASE, "msg-2", "sess-3", "agent", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_DISABLED);
+        flushAssistantOutput({ base: BASE, msgId: "msg-2", sessionId: "sess-3", agent: "agent", config: CONFIG_DISABLED });
         const records = readJSONL(BASE, "session-logs");
         const last = records[records.length - 1];
         assert.notEqual(last.session_id, "sess-3");
@@ -101,7 +101,7 @@ describe("session-collector", () => {
     it("should include root_dir in flushed assistant output", () => {
         const textPart = { properties: { part: { id: "p-root", type: "text", text: "output", messageID: "msg-root", time: { end: 1 } } } };
         handlePartUpdate(BASE, textPart);
-        flushAssistantOutput(BASE, "msg-root", "sess-root", "agent", "2026-01-01T00:00:00.000Z", "/test/project");
+        flushAssistantOutput({ base: BASE, msgId: "msg-root", sessionId: "sess-root", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", rootDir: "/test/project" });
         const records = readJSONL(BASE, "session-logs");
         const last = records[records.length - 1];
         assert.equal(last.root_dir, "/test/project");
@@ -117,7 +117,7 @@ describe("session-collector", () => {
     it("should include username in flushed assistant output", () => {
         const textPart = { properties: { part: { id: "p-user", type: "text", text: "output", messageID: "msg-user", time: { end: 1 } } } };
         handlePartUpdate(BASE, textPart);
-        flushAssistantOutput(BASE, "msg-user", "sess-user", "agent", "2026-01-01T00:00:00.000Z", undefined, "testuser");
+        flushAssistantOutput({ base: BASE, msgId: "msg-user", sessionId: "sess-user", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", username: "testuser" });
         const records = readJSONL(BASE, "session-logs");
         const last = records[records.length - 1];
         assert.equal(last.username, "testuser");
@@ -133,7 +133,7 @@ describe("session-collector", () => {
     it("should include finish_reason in flushed output", () => {
         const textPart = { properties: { part: { id: "p-fr", type: "text", text: "out", messageID: "msg-fr", time: { end: 1 } } } };
         handlePartUpdate(BASE, textPart);
-        flushAssistantOutput(BASE, "msg-fr", "sess-fr", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, undefined, undefined, undefined, "stop", "agent", 1234, undefined, "/home/user/proj", "proj-1", "main");
+        flushAssistantOutput({ base: BASE, msgId: "msg-fr", sessionId: "sess-fr", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", finishReason: "stop", mode: "agent", durationMs: 1234, cwd: "/home/user/proj", projectId: "proj-1", gitBranch: "main" });
         const records = readJSONL(BASE, "session-logs");
         const last = records[records.length - 1];
         assert.equal(last.finish_reason, "stop");
@@ -144,7 +144,7 @@ describe("session-collector", () => {
     it("should include error in flushed output", () => {
         const textPart = { properties: { part: { id: "p-err", type: "text", text: "out", messageID: "msg-err", time: { end: 1 } } } };
         handlePartUpdate(BASE, textPart);
-        flushAssistantOutput(BASE, "msg-err", "sess-err", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, { type: "api_error", message: "timeout" });
+        flushAssistantOutput({ base: BASE, msgId: "msg-err", sessionId: "sess-err", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", error: { type: "api_error", message: "timeout" } });
         const records = readJSONL(BASE, "session-logs");
         const last = records[records.length - 1];
         assert.deepEqual(last.error, { type: "api_error", message: "timeout" });
@@ -152,7 +152,7 @@ describe("session-collector", () => {
     it("should include project_id and git_branch in flushed output", () => {
         const textPart = { properties: { part: { id: "p-pg", type: "text", text: "out", messageID: "msg-pg", time: { end: 1 } } } };
         handlePartUpdate(BASE, textPart);
-        flushAssistantOutput(BASE, "msg-pg", "sess-pg", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, "proj-1", "main");
+        flushAssistantOutput({ base: BASE, msgId: "msg-pg", sessionId: "sess-pg", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", projectId: "proj-1", gitBranch: "main" });
         const records = readJSONL(BASE, "session-logs");
         const last = records[records.length - 1];
         assert.equal(last.project_id, "proj-1");
@@ -161,7 +161,7 @@ describe("session-collector", () => {
     it("should persist duration_ms=0 (not treat as falsy)", () => {
         const textPart = { properties: { part: { id: "p-d0", type: "text", text: "out", messageID: "msg-d0", time: { end: 1 } } } };
         handlePartUpdate(BASE, textPart);
-        flushAssistantOutput(BASE, "msg-d0", "sess-d0", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, 0);
+        flushAssistantOutput({ base: BASE, msgId: "msg-d0", sessionId: "sess-d0", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", durationMs: 0 });
         const records = readJSONL(BASE, "session-logs");
         const last = records[records.length - 1];
         assert.equal(last.duration_ms, 0);
@@ -179,7 +179,7 @@ describe("session-collector", () => {
     it("should include model info and opencode version in flushed output", () => {
         const textPart = { properties: { part: { id: "p-model", type: "text", text: "out", messageID: "msg-model", time: { end: 1 } } } };
         handlePartUpdate(BASE, textPart);
-        flushAssistantOutput(BASE, "msg-model", "sess-model", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, "openai", "gpt-4", "1.15.0");
+        flushAssistantOutput({ base: BASE, msgId: "msg-model", sessionId: "sess-model", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", providerId: "openai", modelId: "gpt-4", opencodeVersion: "1.15.0" });
         const records = readJSONL(BASE, "session-logs");
         const last = records[records.length - 1];
         assert.equal(last.provider_id, "openai");
@@ -254,7 +254,7 @@ describe("session-collector with includeThinking", () => {
         const reasonPart = { properties: { part: { id: "p-thinking-2", type: "reasoning", text: "Thinking in flush", messageID: "msg-thinking-1", time: { end: 2 } } } };
         handlePartUpdate(BASE, textPart);
         handlePartUpdate(BASE, reasonPart);
-        flushAssistantOutput(BASE, "msg-thinking-1", "sess-thinking-1", "agent", "2026-01-01T00:03:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_ENABLED);
+        flushAssistantOutput({ base: BASE, msgId: "msg-thinking-1", sessionId: "sess-thinking-1", agent: "agent", timestamp: "2026-01-01T00:03:00.000Z", config: CONFIG_ENABLED });
         const records = readJSONL(BASE, "session-logs");
         const record = records.find((r) => r.session_id === "sess-thinking-1");
         assert.ok(record !== undefined);
@@ -266,7 +266,7 @@ describe("session-collector with includeThinking", () => {
         const reasonPart = { properties: { part: { id: "p-no-thinking-2", type: "reasoning", text: "Should be excluded", messageID: "msg-no-thinking", time: { end: 2 } } } };
         handlePartUpdate(BASE, textPart);
         handlePartUpdate(BASE, reasonPart);
-        flushAssistantOutput(BASE, "msg-no-thinking", "sess-no-thinking", "agent", "2026-01-01T00:04:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_DISABLED);
+        flushAssistantOutput({ base: BASE, msgId: "msg-no-thinking", sessionId: "sess-no-thinking", agent: "agent", timestamp: "2026-01-01T00:04:00.000Z", config: CONFIG_DISABLED });
         const records = readJSONL(BASE, "session-logs");
         const record = records.find((r) => r.session_id === "sess-no-thinking");
         assert.ok(record !== undefined);

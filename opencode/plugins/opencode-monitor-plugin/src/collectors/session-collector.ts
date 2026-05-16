@@ -101,27 +101,35 @@ export function handlePartUpdate(
   });
 }
 
-export function flushAssistantOutput(
-  base: string,
-  msgId: string,
-  sessionId: string,
-  agent: string,
-  timestamp?: string,
-  rootDir?: string,
-  username?: string,
-  providerId?: string,
-  modelId?: string,
-  opencodeVersion?: string,
-  finishReason?: string,
-  mode?: string,
-  durationMs?: number,
-  error?: Record<string, unknown>,
-  cwd?: string,
-  projectId?: string,
-  gitBranch?: string,
-  skills?: string[],
-  config?: Config,
-): void {
+export interface FlushAssistantOutputOptions {
+  base: string;
+  msgId: string;
+  sessionId: string;
+  agent: string;
+  timestamp?: string;
+  rootDir?: string;
+  username?: string;
+  providerId?: string;
+  modelId?: string;
+  opencodeVersion?: string;
+  finishReason?: string;
+  mode?: string;
+  durationMs?: number;
+  error?: Record<string, unknown>;
+  cwd?: string;
+  projectId?: string;
+  gitBranch?: string;
+  skills?: string[];
+  config?: Config;
+}
+
+export function flushAssistantOutput(options: FlushAssistantOutputOptions): void {
+  const {
+    base, msgId, sessionId, agent, timestamp,
+    rootDir, username, providerId, modelId, opencodeVersion,
+    finishReason, mode, durationMs, error, cwd,
+    projectId, gitBranch, skills, config,
+  } = options;
   const includeThinking = config?.includeThinking ?? false;
   const parts: PendingPart[] = [];
   for (const [id, p] of pendingParts) {

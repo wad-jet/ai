@@ -60,7 +60,7 @@ const MonitorPlugin = async (input) => {
                     const durationMs = info.time?.completed != null && info.time?.created != null ? info.time.completed - info.time.created : undefined;
                     const error = info.error;
                     const cwd = info.path?.cwd;
-                    flushAssistantOutput(base, info.id, info.sessionID, info.agent ?? defaultAgent, undefined, rootDir, username, info.providerID, info.modelID, opencodeVersion, finishReason, mode, durationMs, error, cwd, projectId, gitBranch, undefined, config);
+                    flushAssistantOutput({ base, msgId: info.id, sessionId: info.sessionID, agent: info.agent ?? defaultAgent, rootDir, username, providerId: info.providerID, modelId: info.modelID, opencodeVersion, finishReason, mode, durationMs, error, cwd, projectId, gitBranch, config });
                 }
             }
             catch (err) {

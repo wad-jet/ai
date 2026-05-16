@@ -26,6 +26,27 @@ export declare function handlePartUpdate(base: string, event: {
         };
     };
 }): void;
-export declare function flushAssistantOutput(base: string, msgId: string, sessionId: string, agent: string, timestamp?: string, rootDir?: string, username?: string, providerId?: string, modelId?: string, opencodeVersion?: string, finishReason?: string, mode?: string, durationMs?: number, error?: Record<string, unknown>, cwd?: string, projectId?: string, gitBranch?: string, skills?: string[], config?: Config): void;
+export interface FlushAssistantOutputOptions {
+    base: string;
+    msgId: string;
+    sessionId: string;
+    agent: string;
+    timestamp?: string;
+    rootDir?: string;
+    username?: string;
+    providerId?: string;
+    modelId?: string;
+    opencodeVersion?: string;
+    finishReason?: string;
+    mode?: string;
+    durationMs?: number;
+    error?: Record<string, unknown>;
+    cwd?: string;
+    projectId?: string;
+    gitBranch?: string;
+    skills?: string[];
+    config?: Config;
+}
+export declare function flushAssistantOutput(options: FlushAssistantOutputOptions): void;
 export {};
 //# sourceMappingURL=session-collector.d.ts.map

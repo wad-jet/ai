@@ -78,7 +78,7 @@ describe("session-collector", () => {
     handlePartUpdate(BASE, TEXT_PART as any);
     handlePartUpdate(BASE, REASON_PART as any);
 
-    flushAssistantOutput(BASE, "msg-accum", "sess-accum", "agent", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_ENABLED as any);
+    flushAssistantOutput({ base: BASE, msgId: "msg-accum", sessionId: "sess-accum", agent: "agent", config: CONFIG_ENABLED });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const record = records.find((r) => r.session_id === "sess-accum");
@@ -90,7 +90,7 @@ describe("session-collector", () => {
 
   it("should not flush if no parts accumulated", () => {
     const before = readJSONL(BASE, "session-logs").length;
-    flushAssistantOutput(BASE, "nonexistent", "sess-2", "agent", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_DISABLED as any);
+    flushAssistantOutput({ base: BASE, msgId: "nonexistent", sessionId: "sess-2", agent: "agent", config: CONFIG_DISABLED });
     const after = readJSONL(BASE, "session-logs").length;
     assert.equal(after, before);
   });
@@ -98,7 +98,7 @@ describe("session-collector", () => {
   it("should skip part without time.end", () => {
     const ev = { properties: { part: { id: "p3", type: "text", text: "incomplete", messageID: "msg-2" } } };
     handlePartUpdate(BASE, ev as any);
-    flushAssistantOutput(BASE, "msg-2", "sess-3", "agent", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CONFIG_DISABLED as any);
+    flushAssistantOutput({ base: BASE, msgId: "msg-2", sessionId: "sess-3", agent: "agent", config: CONFIG_DISABLED });
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
     assert.notEqual(last.session_id, "sess-3");
@@ -119,7 +119,7 @@ describe("session-collector", () => {
     const textPart = { properties: { part: { id: "p-root", type: "text", text: "output", messageID: "msg-root", time: { end: 1 } } } };
     handlePartUpdate(BASE, textPart as any);
 
-    flushAssistantOutput(BASE, "msg-root", "sess-root", "agent", "2026-01-01T00:00:00.000Z", "/test/project");
+    flushAssistantOutput({ base: BASE, msgId: "msg-root", sessionId: "sess-root", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", rootDir: "/test/project" });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -141,7 +141,7 @@ describe("session-collector", () => {
     const textPart = { properties: { part: { id: "p-user", type: "text", text: "output", messageID: "msg-user", time: { end: 1 } } } };
     handlePartUpdate(BASE, textPart as any);
 
-    flushAssistantOutput(BASE, "msg-user", "sess-user", "agent", "2026-01-01T00:00:00.000Z", undefined, "testuser");
+    flushAssistantOutput({ base: BASE, msgId: "msg-user", sessionId: "sess-user", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", username: "testuser" });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -163,7 +163,7 @@ describe("session-collector", () => {
     const textPart = { properties: { part: { id: "p-fr", type: "text", text: "out", messageID: "msg-fr", time: { end: 1 } } } };
     handlePartUpdate(BASE, textPart as any);
 
-    flushAssistantOutput(BASE, "msg-fr", "sess-fr", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, undefined, undefined, undefined, "stop", "agent", 1234, undefined, "/home/user/proj", "proj-1", "main");
+    flushAssistantOutput({ base: BASE, msgId: "msg-fr", sessionId: "sess-fr", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", finishReason: "stop", mode: "agent", durationMs: 1234, cwd: "/home/user/proj", projectId: "proj-1", gitBranch: "main" });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -177,7 +177,7 @@ describe("session-collector", () => {
     const textPart = { properties: { part: { id: "p-err", type: "text", text: "out", messageID: "msg-err", time: { end: 1 } } } };
     handlePartUpdate(BASE, textPart as any);
 
-    flushAssistantOutput(BASE, "msg-err", "sess-err", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, { type: "api_error", message: "timeout" });
+    flushAssistantOutput({ base: BASE, msgId: "msg-err", sessionId: "sess-err", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", error: { type: "api_error", message: "timeout" } });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -188,7 +188,7 @@ describe("session-collector", () => {
     const textPart = { properties: { part: { id: "p-pg", type: "text", text: "out", messageID: "msg-pg", time: { end: 1 } } } };
     handlePartUpdate(BASE, textPart as any);
 
-    flushAssistantOutput(BASE, "msg-pg", "sess-pg", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, "proj-1", "main");
+    flushAssistantOutput({ base: BASE, msgId: "msg-pg", sessionId: "sess-pg", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", projectId: "proj-1", gitBranch: "main" });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -200,7 +200,7 @@ describe("session-collector", () => {
     const textPart = { properties: { part: { id: "p-d0", type: "text", text: "out", messageID: "msg-d0", time: { end: 1 } } } };
     handlePartUpdate(BASE, textPart as any);
 
-    flushAssistantOutput(BASE, "msg-d0", "sess-d0", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, undefined, undefined, undefined, undefined, undefined, 0);
+    flushAssistantOutput({ base: BASE, msgId: "msg-d0", sessionId: "sess-d0", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", durationMs: 0 });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -224,7 +224,7 @@ describe("session-collector", () => {
     const textPart = { properties: { part: { id: "p-model", type: "text", text: "out", messageID: "msg-model", time: { end: 1 } } } };
     handlePartUpdate(BASE, textPart as any);
 
-    flushAssistantOutput(BASE, "msg-model", "sess-model", "agent", "2026-01-01T00:00:00.000Z", undefined, undefined, "openai", "gpt-4", "1.15.0");
+    flushAssistantOutput({ base: BASE, msgId: "msg-model", sessionId: "sess-model", agent: "agent", timestamp: "2026-01-01T00:00:00.000Z", providerId: "openai", modelId: "gpt-4", opencodeVersion: "1.15.0" });
 
     const records = readJSONL(BASE, "session-logs") as any[];
     const last = records[records.length - 1];
@@ -355,11 +355,7 @@ describe("session-collector with includeThinking", () => {
     handlePartUpdate(BASE, textPart as any);
     handlePartUpdate(BASE, reasonPart as any);
 
-    flushAssistantOutput(BASE, "msg-thinking-1", "sess-thinking-1", "agent", 
-      "2026-01-01T00:03:00.000Z", undefined, undefined, undefined, undefined, undefined, 
-      undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
-      CONFIG_ENABLED as any,
-    );
+    flushAssistantOutput({ base: BASE, msgId: "msg-thinking-1", sessionId: "sess-thinking-1", agent: "agent", timestamp: "2026-01-01T00:03:00.000Z", config: CONFIG_ENABLED });
 
     const records = readJSONL(BASE, "session-logs");
     const record = records.find((r) => r.session_id === "sess-thinking-1");
@@ -375,11 +371,7 @@ describe("session-collector with includeThinking", () => {
     handlePartUpdate(BASE, textPart as any);
     handlePartUpdate(BASE, reasonPart as any);
 
-    flushAssistantOutput(BASE, "msg-no-thinking", "sess-no-thinking", "agent", 
-      "2026-01-01T00:04:00.000Z", undefined, undefined, undefined, undefined, undefined, 
-      undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
-      CONFIG_DISABLED as any,
-    );
+    flushAssistantOutput({ base: BASE, msgId: "msg-no-thinking", sessionId: "sess-no-thinking", agent: "agent", timestamp: "2026-01-01T00:04:00.000Z", config: CONFIG_DISABLED });
 
     const records = readJSONL(BASE, "session-logs");
     const record = records.find((r) => r.session_id === "sess-no-thinking");
