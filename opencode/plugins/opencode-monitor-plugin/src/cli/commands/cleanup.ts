@@ -95,6 +95,8 @@ export async function runCleanupCLI(
 
   if (args.dryRun) return preview;
 
+  console.log(preview);
+  console.log("");
   const ok = await confirmDelete(files.length);
   if (!ok) return "Cancelled.";
 
