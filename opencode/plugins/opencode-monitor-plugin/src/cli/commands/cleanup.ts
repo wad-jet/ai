@@ -5,7 +5,7 @@ import { getDataDir } from "../../paths.js";
 
 export interface CleanupFile {
   date: string;
-  type: "session-logs" | "token_status";
+  type: "session-logs" | "token-status";
   size: number;
   path: string;
 }
@@ -13,7 +13,7 @@ export interface CleanupFile {
 export function collectCleanupFiles(
   dataDir: string,
   days: number,
-  types: ("session-logs" | "token_status")[],
+  types: ("session-logs" | "token-status")[],
 ): CleanupFile[] {
   const cutoff = new Date(Date.now() - days * 86400000);
   const files: CleanupFile[] = [];
@@ -86,12 +86,12 @@ export async function runCleanupCLI(
 
   if (args.days < 0) return "Error: --days must be a non-negative number.";
 
-  const types: ("session-logs" | "token_status")[] = [];
+  const types: ("session-logs" | "token-status")[] = [];
   if (!args.sessionLogs && !args.tokenStatus) {
-    types.push("session-logs", "token_status");
+    types.push("session-logs", "token-status");
   } else {
     if (args.sessionLogs) types.push("session-logs");
-    if (args.tokenStatus) types.push("token_status");
+    if (args.tokenStatus) types.push("token-status");
   }
 
   const files = collectCleanupFiles(dataDir, args.days, types);

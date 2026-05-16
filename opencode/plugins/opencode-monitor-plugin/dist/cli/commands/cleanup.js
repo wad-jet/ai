@@ -73,13 +73,13 @@ export async function runCleanupCLI(args, base) {
         return "Error: --days must be a non-negative number.";
     const types = [];
     if (!args.sessionLogs && !args.tokenStatus) {
-        types.push("session-logs", "token_status");
+        types.push("session-logs", "token-status");
     }
     else {
         if (args.sessionLogs)
             types.push("session-logs");
         if (args.tokenStatus)
-            types.push("token_status");
+            types.push("token-status");
     }
     const files = collectCleanupFiles(dataDir, args.days, types);
     if (files.length === 0)

@@ -1,10 +1,10 @@
 export interface CleanupFile {
     date: string;
-    type: "session-logs" | "token_status";
+    type: "session-logs" | "token-status";
     size: number;
     path: string;
 }
-export declare function collectCleanupFiles(dataDir: string, days: number, types: ("session-logs" | "token_status")[]): CleanupFile[];
+export declare function collectCleanupFiles(dataDir: string, days: number, types: ("session-logs" | "token-status")[]): CleanupFile[];
 export declare function formatCleanupPreview(files: CleanupFile[]): string;
 export declare function runCleanupCLI(args: {
     days: number;

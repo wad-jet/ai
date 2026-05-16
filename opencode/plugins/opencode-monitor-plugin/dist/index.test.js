@@ -43,7 +43,7 @@ describe("integration: collector pipeline", () => {
             parts: [{ type: "text", text: "world" }, { type: "reasoning", text: "thinking..." }],
         };
         handleChatMessage(BASE, chatInput, chatAssistantOutput, ts, "/test/project", "tester", "anthropic", "claude-3-opus", "1.15.0", "proj-1", "main", ["skill-a"], { includeThinking: true });
-        const tokenRows = readCSV(BASE, "token_status", 11);
+        const tokenRows = readCSV(BASE, "token-status", 11);
         assert.equal(tokenRows.length, 1);
         assert.equal(tokenRows[0][5], "100");
         const logRecords = readJSONL(BASE, "session-logs");

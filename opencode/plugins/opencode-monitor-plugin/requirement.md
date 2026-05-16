@@ -16,10 +16,10 @@
 - session_id (string): идентификатор сессии
 
 Корневой путь ~/.local/share/opencode/opencode-monitor-plugin, далее по папкам:
-- token_status - CSV/JSON файлы статистики токенов
+- token-status - CSV/JSON файлы статистики токенов
 - session-logs - JSON-логи запросов/ответов (по датам)
 
-### Статистика входящих/исходящих токенов (token_status)
+### Статистика входящих/исходящих токенов (token-status)
 
 Show detailed token usage for the current or specified session.
 

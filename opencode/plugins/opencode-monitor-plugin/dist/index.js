@@ -71,7 +71,7 @@ const MonitorPlugin = async (input) => {
             handleChatMessage(base, inputMsg, output, undefined, rootDir, username, model?.providerID, model?.modelID, opencodeVersion, projectId, gitBranch, uniqueSkills, config);
         },
         tool: {
-            token_status: tool({
+            "token-status": tool({
                 description: "Show detailed token usage for the current or specified session",
                 args: {
                     session_id: tool.schema.string().optional().describe("Session ID to inspect. Defaults to current."),

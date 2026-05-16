@@ -32,7 +32,7 @@ export function handleTokenEvent(base: string, event: TokenEvent, timestamp?: st
   if (!info.tokens) return;
 
   const ts = timestamp ?? new Date().toISOString();
-  appendCSV(base, "token_status", COLUMNS, [
+  appendCSV(base, "token-status", COLUMNS, [
     ts,
     info.agent ?? "unknown",
     info.sessionID ?? "",

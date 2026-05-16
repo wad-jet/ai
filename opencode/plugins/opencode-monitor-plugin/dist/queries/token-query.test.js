@@ -22,7 +22,7 @@ function approx(a, b) {
 function writeCSV(base, date, rows) {
     const cols = ["ts", "agent", "session_id", "provider", "model", "in", "out", "reasoning", "cache_r", "cache_w", "cost"];
     for (const row of rows) {
-        appendCSV(base, "token_status", cols, row, date);
+        appendCSV(base, "token-status", cols, row, date);
     }
 }
 describe("token-query", () => {

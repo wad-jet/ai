@@ -23,7 +23,7 @@ function approx(a: number, b: number): boolean {
 function writeCSV(base: string, date: string, rows: string[][]) {
   const cols = ["ts","agent","session_id","provider","model","in","out","reasoning","cache_r","cache_w","cost"];
   for (const row of rows) {
-    appendCSV(base, "token_status", cols, row, date);
+    appendCSV(base, "token-status", cols, row, date);
   }
 }
 

@@ -35,7 +35,7 @@ describe("token-collector", () => {
 
     handleTokenEvent(BASE, event as any);
 
-    const rows = readCSV(BASE, "token_status", 11);
+    const rows = readCSV(BASE, "token-status", 11);
     assert.equal(rows.length, 1);
     assert.equal(rows[0][1], "default");
     assert.equal(rows[0][3], "anthropic");
@@ -52,7 +52,7 @@ describe("token-collector", () => {
     };
 
     handleTokenEvent(BASE, event as any);
-    const rows = readCSV(BASE, "token_status", 11);
+    const rows = readCSV(BASE, "token-status", 11);
     assert.equal(rows.length, 1);
   });
 
@@ -65,7 +65,7 @@ describe("token-collector", () => {
     };
 
     handleTokenEvent(BASE, event as any);
-    const rows = readCSV(BASE, "token_status", 11);
+    const rows = readCSV(BASE, "token-status", 11);
     assert.equal(rows.length, 1);
   });
 });

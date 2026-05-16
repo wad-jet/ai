@@ -17,7 +17,7 @@ export interface TokenSummary {
 }
 
 export function queryTokenSummary(base: string, days: number): TokenSummary {
-  const rows = readCSV(base, "token_status", COL_COUNT);
+  const rows = readCSV(base, "token-status", COL_COUNT);
   const summary: TokenSummary = {
     totalInput: 0, totalOutput: 0, totalReasoning: 0,
     totalCacheRead: 0, totalCacheWrite: 0, totalCost: 0, totalRows: rows.length,
@@ -54,7 +54,7 @@ export interface DailyRow {
 }
 
 export function queryDailyBreakdown(base: string, _days: number): DailyRow[] {
-  const rows = readCSV(base, "token_status", COL_COUNT);
+  const rows = readCSV(base, "token-status", COL_COUNT);
   const map = new Map<string, DailyRow>();
   for (const row of rows) {
     const date = (row[COL.TS] ?? "").slice(0, 10);
@@ -83,7 +83,7 @@ export function queryAgentBreakdown(
   sortBy: "cost" | "tokens",
   topN: number,
 ): AgentRow[] {
-  const rows = readCSV(base, "token_status", COL_COUNT);
+  const rows = readCSV(base, "token-status", COL_COUNT);
   const map = new Map<string, AgentRow>();
   for (const row of rows) {
     const agent = row[COL.AGENT] || "unknown";

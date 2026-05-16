@@ -78,7 +78,7 @@ const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
     },
 
     tool: {
-      token_status: tool({
+      "token-status": tool({
         description: "Show detailed token usage for the current or specified session",
         args: {
           session_id: tool.schema.string().optional().describe("Session ID to inspect. Defaults to current."),

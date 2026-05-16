@@ -15,10 +15,10 @@ Show detailed token usage data collected by the monitor plugin.
 
 ## Execution
 
-Use the `token_status` tool to retrieve and display the data with the arguments provided:
+Use the `token-status` tool to retrieve and display the data with the arguments provided:
 
 ```
 $ARGUMENTS
 ```
 
-Parse these arguments as key=value pairs and pass them to the `token_status` tool. Show the result directly to the user.
+Parse these arguments as key=value pairs and pass them to the `token-status` tool. Show the result directly to the user.
