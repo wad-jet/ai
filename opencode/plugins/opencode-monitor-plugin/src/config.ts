@@ -6,6 +6,6 @@ export const ConfigSchema = z.object({
 
 export type Config = z.infer<typeof ConfigSchema>;
 
-export function createConfig(input: Partial<Config>): Config {
-  return ConfigSchema.parse(input);
+export function createConfig(input: Partial<Config> | undefined): Config {
+  return ConfigSchema.parse(input ?? {});
 }
