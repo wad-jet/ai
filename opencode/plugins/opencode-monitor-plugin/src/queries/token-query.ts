@@ -6,6 +6,10 @@ const COL = {
   IN: 5, OUT: 6, REASONING: 7, CACHE_R: 8, CACHE_W: 9, COST: 10,
 };
 
+function roundCost(cost: number): number {
+  return Math.round(cost * 1e6) / 1e6;
+}
+
 export interface TokenSummary {
   totalInput: number;
   totalOutput: number;
@@ -30,7 +34,7 @@ export function queryTokenSummary(base: string, days: number): TokenSummary {
     summary.totalCacheWrite += Number(row[COL.CACHE_W]) || 0;
     summary.totalCost += Number(row[COL.COST]) || 0;
   }
-  summary.totalCost = Math.round(summary.totalCost * 1e6) / 1e6;
+  summary.totalCost = roundCost(summary.totalCost);
   return summary;
 }
 
@@ -70,7 +74,7 @@ export function queryDailyBreakdown(base: string, days: number): DailyRow[] {
     map.set(date, entry);
   }
   for (const entry of map.values()) {
-    entry.cost = Math.round(entry.cost * 1e6) / 1e6;
+    entry.cost = roundCost(entry.cost);
   }
   const result = Array.from(map.values());
   result.sort((a, b) => a.date.localeCompare(b.date));
@@ -95,7 +99,7 @@ export function queryAgentBreakdown(
     map.set(agent, entry);
   }
   for (const entry of map.values()) {
-    entry.cost = Math.round(entry.cost * 1e6) / 1e6;
+    entry.cost = roundCost(entry.cost);
   }
   const result = Array.from(map.values());
   result.sort((a, b) => sortBy === "cost" ? b.cost - a.cost : (b.input + b.output) - (a.input + a.output));
