@@ -1,6 +1,7 @@
 import { readJSONL } from "../../storage/jsonl-writer.js";
 import { getDataDir } from "../../paths.js";
 import type { Config } from "../../config.js";
+import { SESSION_LOGS } from "../../constants.js";
 
 interface LogFilters {
   sessionId?: string;
@@ -21,7 +22,7 @@ export function runSessionLogCLI(action: string, filters: LogFilters, basePath?:
   const lines: string[] = [];
 
   if (action === "list") {
-    const records = readJSONL(base, "session-logs");
+    const records = readJSONL(base, SESSION_LOGS);
     const sessions = new Map<string, { timestamp: string; session_id: string }>();
     for (const r of records) {
       const sid = String(r.session_id ?? "");
@@ -39,7 +40,7 @@ export function runSessionLogCLI(action: string, filters: LogFilters, basePath?:
   }
 
   if (action === "view" && filters.sessionId) {
-    let sessionRecords = readJSONL(base, "session-logs")
+    let sessionRecords = readJSONL(base, SESSION_LOGS)
       .filter((r) => String(r.session_id) === filters.sessionId);
     
     // Apply filters
@@ -107,7 +108,7 @@ export function runSessionLogCLI(action: string, filters: LogFilters, basePath?:
   }
 
   if (action === "search" && filters.searchText) {
-    const records = readJSONL(base, "session-logs");
+    const records = readJSONL(base, SESSION_LOGS);
     const text = filters.searchText.toLowerCase();
     const matching = records.filter(
       (r) =>

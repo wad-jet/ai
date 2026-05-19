@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { appendCSV } from "../storage/csv-writer.js";
 import { queryTokenSummary, queryAgentBreakdown, queryDailyBreakdown } from "./token-query.js";
+import { TOKEN_STATUS } from "../constants.js";
 
 let testNum = 0;
 
@@ -22,7 +23,7 @@ function approx(a: number, b: number): boolean {
 
 function writeCSV(base: string, date: string, rows: string[][]) {
   for (const row of rows) {
-    appendCSV(base, "token-status", row, date);
+    appendCSV(base, TOKEN_STATUS, row, date);
   }
 }
 

@@ -1,4 +1,5 @@
 import { readCSV } from "../storage/csv-writer.js";
+import { TOKEN_STATUS } from "../constants.js";
 
 const COL_COUNT = 11;
 const COL = {
@@ -21,7 +22,7 @@ export interface TokenSummary {
 }
 
 export function queryTokenSummary(base: string, days: number): TokenSummary {
-  const rows = readCSV(base, "token-status", COL_COUNT, days);
+  const rows = readCSV(base, TOKEN_STATUS, COL_COUNT, days);
   const summary: TokenSummary = {
     totalInput: 0, totalOutput: 0, totalReasoning: 0,
     totalCacheRead: 0, totalCacheWrite: 0, totalCost: 0, totalRows: rows.length,
@@ -58,7 +59,7 @@ export interface DailyRow {
 }
 
 export function queryDailyBreakdown(base: string, days: number): DailyRow[] {
-  const rows = readCSV(base, "token-status", COL_COUNT, days);
+  const rows = readCSV(base, TOKEN_STATUS, COL_COUNT, days);
   const map = new Map<string, DailyRow>();
   for (const row of rows) {
     const date = (row[COL.TS] ?? "").slice(0, 10);
@@ -87,7 +88,7 @@ export function queryAgentBreakdown(
   sortBy: "cost" | "tokens",
   topN: number,
 ): AgentRow[] {
-  const rows = readCSV(base, "token-status", COL_COUNT, days);
+  const rows = readCSV(base, TOKEN_STATUS, COL_COUNT, days);
   const map = new Map<string, AgentRow>();
   for (const row of rows) {
     const agent = row[COL.AGENT] || "unknown";
