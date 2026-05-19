@@ -72,6 +72,8 @@ function formatSessionView(filters: LogFilters, basePath: string, config?: Confi
     if (r.duration_ms !== undefined) lines.push(`Duration: ${r.duration_ms}ms`);
     if (r.finish_reason) lines.push(`Finish:  ${r.finish_reason}`);
     if (r.error) lines.push(`Error:   ${typeof r.error === 'object' ? JSON.stringify(r.error) : r.error}`);
+    if (r.skills) lines.push(`Skills:  ${Array.isArray(r.skills) ? r.skills.join(", ") : r.skills}`);
+    if (r.tools) lines.push(`Tools:   ${Array.isArray(r.tools) ? r.tools.join(", ") : r.tools}`);
     lines.push("");
 
     const field = filters.field ?? "all";

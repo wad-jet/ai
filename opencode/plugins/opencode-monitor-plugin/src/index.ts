@@ -13,6 +13,22 @@ import { buildTokenStatusOutput } from "./tools/token-status.js";
 
 const OPENCODE_CONFIG_DIR = join(homedir(), ".config", "opencode");
 
+const CORE_TOOLS = new Set([
+  "bash", "read", "write", "edit", "glob", "grep", "webfetch", "websearch",
+  "skill", "agent", "session", "permission", "compact", "todo", "mcp",
+  "shell", "git", "codebase", "browser",
+]);
+
+function classifyTools(parts: any[]): { skills: string[]; tools: string[] } {
+  const allTools = parts
+    .filter((p: any) => p.type === "tool" && p.tool)
+    .map((p: any) => p.tool as string);
+
+  const skills = [...new Set(allTools.filter((t) => !CORE_TOOLS.has(t)))];
+  const tools = [...new Set(allTools.filter((t) => CORE_TOOLS.has(t)))];
+  return { skills, tools };
+}
+
 function getPluginRoot(): string {
   const __filename = fileURLToPath(import.meta.url);
   return dirname(dirname(__filename)); // dist/ -> plugin root
@@ -104,11 +120,7 @@ const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
       try {
         const model = (inputMsg as any).model;
         const parts = (output as any).parts ?? [];
-        const skills = parts
-          .filter((p: any) => p.type === "tool")
-          .map((p: any) => p.tool)
-          .filter((t: string) => t);
-        const uniqueSkills = skills.length > 0 ? [...new Set(skills)] as string[] : undefined;
+        const { skills, tools } = classifyTools(parts);
         handleChatMessage({
           base,
           input: inputMsg as any,
@@ -120,7 +132,8 @@ const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
           opencodeVersion,
           projectId,
           gitBranch,
-          skills: uniqueSkills,
+          skills: skills.length > 0 ? skills : undefined,
+          tools: tools.length > 0 ? tools : undefined,
           config,
         });
       } catch (err) {

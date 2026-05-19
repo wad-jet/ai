@@ -48,6 +48,7 @@ export interface HandleChatMessageOptions {
   projectId?: string;
   gitBranch?: string;
   skills?: string[];
+  tools?: string[];
   config?: Config;
 }
 
@@ -81,6 +82,9 @@ export function handleChatMessage(options: HandleChatMessageOptions): void {
   if (options.opencodeVersion) record.opencode_version = options.opencodeVersion;
   if (!isUser && options.skills) {
     record.skills = options.skills;
+  }
+  if (!isUser && options.tools) {
+    record.tools = options.tools;
   }
   if (isUser) {
     record.input = text;
@@ -139,6 +143,7 @@ export interface FlushAssistantOutputOptions {
   projectId?: string;
   gitBranch?: string;
   skills?: string[];
+  tools?: string[];
   config?: Config;
 }
 
@@ -147,7 +152,7 @@ export function flushAssistantOutput(options: FlushAssistantOutputOptions): void
     base, msgId, sessionId, agent, timestamp,
     rootDir, username, providerId, modelId, opencodeVersion,
     finishReason, mode, durationMs, error, cwd,
-    projectId, gitBranch, skills, config,
+    projectId, gitBranch, skills, tools, config,
   } = options;
   const includeThinking = config?.includeThinking ?? false;
   const parts: PendingPart[] = [];
@@ -199,6 +204,7 @@ export function flushAssistantOutput(options: FlushAssistantOutputOptions): void
   if (cwd) record.cwd = cwd;
   if (includeThinking && reasoning) record.thinking = reasoning;
   if (skills) record.skills = skills;
+  if (tools) record.tools = tools;
 
   appendJSONL(base, SESSION_LOGS, record);
 }
