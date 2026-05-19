@@ -65,7 +65,7 @@ describe("cleanup", () => {
     const base = freshDir();
     touch(base, "session-logs", "2025-03-01");
     const result = await runCleanupCLI(
-      { days: 1, sessionLogs: false, tokenStatus: false, dryRun: true },
+      { keepDays: 1, sessionLogs: false, tokenStatus: false, dryRun: true },
       base,
     );
     assert.match(result, /Files to delete/);

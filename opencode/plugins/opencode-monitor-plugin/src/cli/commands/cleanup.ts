@@ -73,12 +73,12 @@ function confirmDelete(count: number): Promise<boolean> {
 }
 
 export async function runCleanupCLI(
-  args: { days: number; sessionLogs: boolean; tokenStatus: boolean; dryRun: boolean },
+  args: { keepDays: number; sessionLogs: boolean; tokenStatus: boolean; dryRun: boolean },
   base?: string,
 ): Promise<string> {
   const dataDir = base ?? getDataDir();
 
-  if (args.days < 0) return "Error: --days must be a non-negative number.";
+  if (args.keepDays < 0) return "Error: --keep-days must be a non-negative number.";
 
   const types: ("session-logs" | "token-status")[] = [];
   if (!args.sessionLogs && !args.tokenStatus) {
@@ -88,7 +88,7 @@ export async function runCleanupCLI(
     if (args.tokenStatus) types.push("token-status");
   }
 
-  const files = collectCleanupFiles(dataDir, args.days, types);
+  const files = collectCleanupFiles(dataDir, args.keepDays, types);
   if (files.length === 0) return "No files to delete.";
 
   const preview = formatCleanupPreview(files);

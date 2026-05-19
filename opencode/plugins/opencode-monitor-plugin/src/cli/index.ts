@@ -73,13 +73,13 @@ async function main(): Promise<void> {
     }
     case "cleanup": {
       const opts = parseArgs(args);
-      const days = Number(opts["days"] ?? NaN);
-      if (isNaN(days) || days < 0) {
-        console.log("Error: --days must be a non-negative number.");
+      const keepDays = Number(opts["keep-days"] ?? NaN);
+      if (isNaN(keepDays) || keepDays < 0) {
+        console.log("Error: --keep-days must be a non-negative number.");
         return;
       }
       const result = await runCleanupCLI({
-        days,
+        keepDays,
         sessionLogs: opts["session-logs"] === true,
         tokenStatus: opts["token-status"] === true,
         dryRun: opts["dry-run"] === true,
@@ -94,7 +94,7 @@ async function main(): Promise<void> {
   opencode-monitor session-log <session-id> [options]
   opencode-monitor session-log list
   opencode-monitor session-log search <text>
-  opencode-monitor cleanup --days <N> [--session-logs] [--token-status] [--dry-run]
+  opencode-monitor cleanup --keep-days <N> [--session-logs] [--token-status] [--dry-run]
 
   opencode-monitor v${VERSION}
 
@@ -119,7 +119,7 @@ Options for session-log:
   --error               Show only records with errors
 
 Options for cleanup:
-  --days <N>            Delete data older than N days (required)
+  --keep-days <N>       Delete data older than N days (required)
   --session-logs        Delete only session logs
   --token-status        Delete only token metrics
   --dry-run             Preview without deleting`);

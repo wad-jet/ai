@@ -345,23 +345,23 @@ Thinking:
 
 ```bash
 # Удалить все данные старше 30 дней
-opencode-monitor cleanup --days 30
+opencode-monitor cleanup --keep-days 30
 
 # Только логи сессий старше 90 дней
-opencode-monitor cleanup --days 90 --session-logs
+opencode-monitor cleanup --keep-days 90 --session-logs
 
 # Только метрики токенов старше 7 дней
-opencode-monitor cleanup --days 7 --token-status
+opencode-monitor cleanup --keep-days 7 --token-status
 
 # Предпросмотр (без удаления)
-opencode-monitor cleanup --days 30 --dry-run
+opencode-monitor cleanup --keep-days 30 --dry-run
 ```
 
 **Параметры `cleanup`:**
 
 | Параметр | Тип | Описание | По умолчанию |
 |----------|-----|----------|--------------|
-| `--days` | number | **Обязательный.** Хранить файлы не старше N дней | — |
+| `--keep-days` | number | **Обязательный.** Хранить файлы не старше N дней | — |
 | `--session-logs` | boolean | Только логи сессий | `false` |
 | `--token-status` | boolean | Только метрики токенов | `false` |
 | `--dry-run` | boolean | Предпросмотр без удаления | `false` |
