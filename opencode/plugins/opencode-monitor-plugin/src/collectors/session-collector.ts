@@ -20,25 +20,27 @@ interface PendingPart {
 
 const pendingParts = new Map<string, PendingPart>();
 
-export function handleChatMessage(
-  base: string,
-  input: ChatInput,
-  output: ChatOutput,
-  timestamp?: string,
-  rootDir?: string,
-  username?: string,
-  providerId?: string,
-  modelId?: string,
-  opencodeVersion?: string,
-  projectId?: string,
-  gitBranch?: string,
-  skills?: string[],
-  config?: Config,
-): void {
-  const ts = timestamp ?? new Date().toISOString();
-  const includeThinking = config?.includeThinking ?? false;
+export interface HandleChatMessageOptions {
+  base: string;
+  input: ChatInput;
+  output: ChatOutput;
+  timestamp?: string;
+  rootDir?: string;
+  username?: string;
+  providerId?: string;
+  modelId?: string;
+  opencodeVersion?: string;
+  projectId?: string;
+  gitBranch?: string;
+  skills?: string[];
+  config?: Config;
+}
 
-  const parts = output.parts ?? [];
+export function handleChatMessage(options: HandleChatMessageOptions): void {
+  const ts = options.timestamp ?? new Date().toISOString();
+  const includeThinking = options.config?.includeThinking ?? false;
+
+  const parts = options.output.parts ?? [];
   const text = parts
     .filter((p) => p.type === "text")
     .map((p) => p.text ?? "")
@@ -48,22 +50,22 @@ export function handleChatMessage(
     .map((p) => p.text ?? "")
     .join("\n");
 
-  const isUser = output.message?.role === "user";
+  const isUser = options.output.message?.role === "user";
 
   const record: Record<string, unknown> = {
     timestamp: ts,
-    session_id: input.sessionID ?? "",
-    agent: input.agent ?? "unknown",
+    session_id: options.input.sessionID ?? "",
+    agent: options.input.agent ?? "unknown",
   };
-  if (username) record.username = username;
-  if (projectId) record.project_id = projectId;
-  if (gitBranch) record.git_branch = gitBranch;
-  if (rootDir) record.root_dir = rootDir;
-  if (providerId) record.provider_id = providerId;
-  if (modelId) record.model_id = modelId;
-  if (opencodeVersion) record.opencode_version = opencodeVersion;
-  if (!isUser && skills) {
-    record.skills = skills;
+  if (options.username) record.username = options.username;
+  if (options.projectId) record.project_id = options.projectId;
+  if (options.gitBranch) record.git_branch = options.gitBranch;
+  if (options.rootDir) record.root_dir = options.rootDir;
+  if (options.providerId) record.provider_id = options.providerId;
+  if (options.modelId) record.model_id = options.modelId;
+  if (options.opencodeVersion) record.opencode_version = options.opencodeVersion;
+  if (!isUser && options.skills) {
+    record.skills = options.skills;
   }
   if (isUser) {
     record.input = text;
@@ -72,7 +74,7 @@ export function handleChatMessage(
   }
   if (includeThinking && thinkingText) record.thinking = thinkingText;
 
-  appendJSONL(base, "session-logs", record);
+  appendJSONL(options.base, "session-logs", record);
 }
 
 const PART_TTL_MS = 5 * 60 * 1000; // 5 minutes

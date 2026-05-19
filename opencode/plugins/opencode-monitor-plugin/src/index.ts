@@ -82,7 +82,20 @@ const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
           .map((p: any) => p.tool)
           .filter((t: string) => t);
         const uniqueSkills = skills.length > 0 ? [...new Set(skills)] as string[] : undefined;
-        handleChatMessage(base, inputMsg as any, output as any, undefined, rootDir, username, model?.providerID, model?.modelID, opencodeVersion, projectId, gitBranch, uniqueSkills, config);
+        handleChatMessage({
+          base,
+          input: inputMsg as any,
+          output: output as any,
+          rootDir,
+          username,
+          providerId: model?.providerID,
+          modelId: model?.modelID,
+          opencodeVersion,
+          projectId,
+          gitBranch,
+          skills: uniqueSkills,
+          config,
+        });
       } catch (err) {
         console.error("[opencode-monitor-plugin] chat.message hook error:", err);
       }

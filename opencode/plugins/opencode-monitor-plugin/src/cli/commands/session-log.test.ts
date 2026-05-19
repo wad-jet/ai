@@ -1,6 +1,6 @@
 import { describe, it, after } from "node:test";
 import { strict as assert } from "node:assert";
-import { rmSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { rmSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { runSessionLogCLI } from "./session-log.js";
@@ -20,7 +20,7 @@ function writeSessionRecord(base: string, date: string, record: object) {
   const dir = join(base, "session-logs");
   mkdirSync(dir, { recursive: true });
   const file = join(dir, date + ".jsonl");
-  const content = existsSync(file) ? "" : "";
+  const content = "";
   writeFileSync(file, JSON.stringify(record) + "\n", { flag: "a" });
 }
 

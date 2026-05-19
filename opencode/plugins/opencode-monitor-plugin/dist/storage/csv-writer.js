@@ -17,13 +17,14 @@ export function appendCSV(baseDir, subdir, _columns, values, date) {
     });
     appendFileSync(file, escaped.join(",") + "\n");
 }
-export function readCSV(baseDir, subdir, columnCount) {
+export function readCSV(baseDir, subdir, columnCount, maxDays) {
     const dir = join(baseDir, subdir);
     if (!existsSync(dir))
         return [];
     const files = readdirSync(dir).filter((f) => f.endsWith(".csv")).sort();
+    const recent = maxDays ? files.slice(-maxDays) : files;
     const rows = [];
-    for (const file of files) {
+    for (const file of recent) {
         const content = readFileSync(join(dir, file), "utf-8");
         for (const line of content.trim().split("\n")) {
             if (!line)
