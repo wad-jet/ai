@@ -1,11 +1,24 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { runTokenStatusCLI } from "./commands/token-status.js";
 import { runSessionLogCLI } from "./commands/session-log.js";
 import { runCleanupCLI } from "./commands/cleanup.js";
 import { getDataDir } from "../paths.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const pkg = JSON.parse(readFileSync(join(__dirname, "../../package.json"), "utf-8"));
+const VERSION = pkg.version as string;
+
 const args = process.argv.slice(2);
 const command = args[0];
+
+if (args.includes("--version") || args.includes("-v")) {
+  console.log(VERSION);
+  process.exit(0);
+}
 
 function parseArgs(args: string[]): Record<string, string | boolean | number | undefined> {
   const parsed: Record<string, string | boolean | number | undefined> = {};
@@ -76,11 +89,14 @@ async function main(): Promise<void> {
     }
     default:
       console.log(`Usage:
+  opencode-monitor --version
   opencode-monitor token-status [options]
   opencode-monitor session-log <session-id> [options]
   opencode-monitor session-log list
   opencode-monitor session-log search <text>
   opencode-monitor cleanup --days <N> [--session-logs] [--token-status] [--dry-run]
+
+  opencode-monitor v${VERSION}
 
 Options for token-status:
   --session-id <id>     Session ID to inspect
