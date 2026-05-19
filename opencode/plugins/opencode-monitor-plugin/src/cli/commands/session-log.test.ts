@@ -104,4 +104,47 @@ describe("session-log filters", () => {
     const output = runSessionLogCLI("view", { sessionId: "sess-4", field: "thinking" }, base);
     assert.ok(!output.includes("reasoning data"), "reasoning should be hidden by default when config is undefined");
   });
+
+  it("list action should show sessions", () => {
+    const base = freshDir();
+    writeSessionRecord(base, "2026-05-14", { timestamp: "2026-05-14T10:00:00.000Z", session_id: "sess-list-1", agent: "feature", input: "hello", output: "world" });
+    writeSessionRecord(base, "2026-05-15", { timestamp: "2026-05-15T10:00:00.000Z", session_id: "sess-list-2", agent: "explore", input: "hi", output: "there" });
+
+    const output = runSessionLogCLI("list", {}, base);
+    assert.match(output, /sess-list-1/);
+    assert.match(output, /sess-list-2/);
+    assert.match(output, /Available Sessions/);
+  });
+
+  it("list action should show empty message when no data", () => {
+    const base = freshDir();
+
+    const output = runSessionLogCLI("list", {}, base);
+    assert.match(output, /No session logs found/);
+  });
+
+  it("search action should find matching records", () => {
+    const base = freshDir();
+    writeSessionRecord(base, "2026-05-14", { timestamp: "2026-05-14T10:00:00.000Z", session_id: "sess-s1", agent: "feature", input: "hello world", output: "goodbye" });
+    writeSessionRecord(base, "2026-05-14", { timestamp: "2026-05-14T11:00:00.000Z", session_id: "sess-s2", agent: "feature", input: "something else", output: "hello there" });
+
+    const output = runSessionLogCLI("search", { searchText: "hello" }, base);
+    assert.match(output, /sess-s1/);
+    assert.match(output, /sess-s2/);
+  });
+
+  it("search action should show no matches when no match", () => {
+    const base = freshDir();
+    writeSessionRecord(base, "2026-05-14", { timestamp: "2026-05-14T10:00:00.000Z", session_id: "sess-nomatch", agent: "feature", input: "foo", output: "bar" });
+
+    const output = runSessionLogCLI("search", { searchText: "zzzzz" }, base);
+    assert.match(output, /No matches found/);
+  });
+
+  it("help action should show usage text", () => {
+    const base = freshDir();
+    const output = runSessionLogCLI("help", {}, base);
+    assert.match(output, /Usage:/);
+    assert.match(output, /session-log/);
+  });
 });
