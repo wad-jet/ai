@@ -86,7 +86,7 @@ const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
         handleTokenEvent(base, event as any);
         handlePartUpdate(base, event as any);
         const ev = event as any;
-        if (ev.type === "message.updated" && ev.properties?.info?.role === "assistant" && ev.properties?.info?.tokens) {
+        if (ev.type === "message.updated" && ev.properties?.info?.role === "assistant" && ev.properties?.info?.tokens && ev.properties?.info?.finish) {
           const info = ev.properties.info;
           const finishReason = info.finish;
           const mode = info.mode;
