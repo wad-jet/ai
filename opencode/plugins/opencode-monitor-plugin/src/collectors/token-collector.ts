@@ -1,4 +1,5 @@
 import { appendCSV } from "../storage/csv-writer.js";
+import { TOKEN_STATUS } from "../constants.js";
 
 interface TokenEvent {
   type: string;
@@ -20,11 +21,6 @@ interface TokenEvent {
   };
 }
 
-const COLUMNS = [
-  "timestamp", "agent", "session_id", "provider_id", "model_id",
-  "input_tokens", "output_tokens", "reasoning_tokens", "cache_read", "cache_write", "cost",
-];
-
 export function handleTokenEvent(base: string, event: TokenEvent, timestamp?: string): void {
   if (event.type !== "message.updated") return;
   const info = event.properties?.info;
@@ -32,7 +28,7 @@ export function handleTokenEvent(base: string, event: TokenEvent, timestamp?: st
   if (!info.tokens) return;
 
   const ts = timestamp ?? new Date().toISOString();
-  appendCSV(base, "token-status", COLUMNS, [
+  appendCSV(base, TOKEN_STATUS, [
     ts,
     info.agent ?? "unknown",
     info.sessionID ?? "",

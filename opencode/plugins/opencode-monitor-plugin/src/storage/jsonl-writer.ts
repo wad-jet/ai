@@ -1,9 +1,6 @@
 import { appendFileSync, readFileSync, existsSync, mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-
-function datePartition(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+import { datePartition } from "./utils.js";
 
 export function appendJSONL(
   baseDir: string,

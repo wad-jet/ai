@@ -1,5 +1,6 @@
 import { appendJSONL } from "../storage/jsonl-writer.js";
 import type { Config } from "../config.js";
+import { SESSION_LOGS } from "../constants.js";
 
 interface ChatInput {
   sessionID?: string;
@@ -16,6 +17,18 @@ interface PendingPart {
   type: string;
   text: string;
   messageID: string;
+}
+
+interface PartUpdateEvent {
+  properties?: {
+    part?: {
+      id?: string;
+      type?: string;
+      text?: string;
+      messageID?: string;
+      time?: { end?: number };
+    };
+  };
 }
 
 const pendingParts = new Map<string, PendingPart>();
@@ -74,14 +87,14 @@ export function handleChatMessage(options: HandleChatMessageOptions): void {
   }
   if (includeThinking && thinkingText) record.thinking = thinkingText;
 
-  appendJSONL(options.base, "session-logs", record);
+  appendJSONL(options.base, SESSION_LOGS, record);
 }
 
 const PART_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export function handlePartUpdate(
   base: string,
-  event: { properties?: { part?: { id?: string; type?: string; text?: string; messageID?: string; time?: { end?: number } } } },
+  event: PartUpdateEvent,
 ): void {
   const part = event.properties?.part;
   if (!part?.type || !part.id || !part.messageID) return;
@@ -169,5 +182,5 @@ export function flushAssistantOutput(options: FlushAssistantOutputOptions): void
   if (includeThinking && reasoning) record.thinking = reasoning;
   if (skills) record.skills = skills;
 
-  appendJSONL(base, "session-logs", record);
+  appendJSONL(base, SESSION_LOGS, record);
 }

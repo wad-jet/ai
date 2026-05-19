@@ -7,6 +7,7 @@ import { handleTokenEvent } from "./collectors/token-collector.js";
 import { handleChatMessage } from "./collectors/session-collector.js";
 import { readCSV } from "./storage/csv-writer.js";
 import { readJSONL } from "./storage/jsonl-writer.js";
+import { SESSION_LOGS, TOKEN_STATUS } from "./constants.js";
 
 const BASE = join(tmpdir(), "monitor-integration-" + Date.now());
 after(() => {
@@ -71,11 +72,11 @@ describe("integration: collector pipeline", () => {
       config: { includeThinking: true as const },
     });
 
-    const tokenRows = readCSV(BASE, "token-status", 11);
+    const tokenRows = readCSV(BASE, TOKEN_STATUS, 11);
     assert.equal(tokenRows.length, 1);
     assert.equal(tokenRows[0][5], "100");
 
-    const logRecords = readJSONL(BASE, "session-logs") as any[];
+    const logRecords = readJSONL(BASE, SESSION_LOGS) as any[];
     assert.equal(logRecords.length, 2);
     assert.equal(logRecords[0].input, "hello");
     assert.equal(logRecords[0].root_dir, "/test/project");
