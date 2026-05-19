@@ -1,7 +1,7 @@
 import type { PluginInput, Hooks } from "@opencode-ai/plugin";
 import { tool } from "@opencode-ai/plugin/tool";
 import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, copyFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, cpSync, readdirSync } from "node:fs";
 import { userInfo, homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -11,30 +11,57 @@ import { handleChatMessage, handlePartUpdate, flushAssistantOutput } from "./col
 import { loadPluginConfig, type Config } from "./config.js";
 import { buildTokenStatusOutput } from "./tools/token-status.js";
 
-// Copy command files to OpenCode config so /token-status shows up in autocomplete
-function setupCommands(): void {
-  try {
-    const __filename = fileURLToPath(import.meta.url);
-    const pluginRoot = dirname(dirname(__filename)); // dist/ -> plugin root
-    const srcCmd = join(pluginRoot, "commands", "token-status.md");
-    const commandsDir = join(homedir(), ".config", "opencode", "command");
-    const destCmd = join(commandsDir, "token-status.md");
+const OPENCODE_CONFIG_DIR = join(homedir(), ".config", "opencode");
 
-    const srcSize = statSync(srcCmd).size;
+function getPluginRoot(): string {
+  const __filename = fileURLToPath(import.meta.url);
+  return dirname(dirname(__filename)); // dist/ -> plugin root
+}
 
-    // Copy if destination doesn't exist or size differs (content changed)
-    if (!existsSync(destCmd) || statSync(destCmd).size !== srcSize) {
-      mkdirSync(commandsDir, { recursive: true });
-      copyFileSync(srcCmd, destCmd);
+// Auto-copy skills and commands to opencode config on first run
+function setupSkillsAndCommands(): void {
+  const pluginRoot = getPluginRoot();
+
+  // Copy skills: pluginRoot/skills/<skill-name>/ -> ~/.config/opencode/skill/<skill-name>/
+  const pluginSkillsDir = join(pluginRoot, "skills");
+  if (existsSync(pluginSkillsDir)) {
+    const skillsDir = join(OPENCODE_CONFIG_DIR, "skill");
+    for (const skill of readdirSync(pluginSkillsDir)) {
+      const srcSkill = join(pluginSkillsDir, skill);
+      const destSkill = join(skillsDir, skill);
+      if (existsSync(srcSkill) && !existsSync(destSkill)) {
+        try {
+          mkdirSync(destSkill, { recursive: true });
+          cpSync(srcSkill, destSkill, { recursive: true });
+        } catch {
+          // Silent fail
+        }
+      }
     }
-  } catch {
-    // Silent fail — commands are a nice-to-have
+  }
+
+  // Copy commands: pluginRoot/commands/<cmd>.md -> ~/.config/opencode/command/<cmd>.md
+  const pluginCommandsDir = join(pluginRoot, "commands");
+  if (existsSync(pluginCommandsDir)) {
+    const commandsDir = join(OPENCODE_CONFIG_DIR, "command");
+    for (const cmd of readdirSync(pluginCommandsDir)) {
+      const srcCmd = join(pluginCommandsDir, cmd);
+      const destCmd = join(commandsDir, cmd);
+      if (existsSync(srcCmd) && !existsSync(destCmd)) {
+        try {
+          mkdirSync(commandsDir, { recursive: true });
+          cpSync(srcCmd, destCmd);
+        } catch {
+          // Silent fail
+        }
+      }
+    }
   }
 }
 
 const MonitorPlugin = async (input: PluginInput): Promise<Hooks> => {
-  // Register /token-status slash command with OpenCode
-  setupCommands();
+  // Auto-setup skills and commands on first run
+  setupSkillsAndCommands();
 
   const base = getDataDir();
   const defaultAgent = (input.project as any)?.name ?? "unknown";
