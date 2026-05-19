@@ -17,6 +17,8 @@ interface PendingPart {
   type: string;
   text: string;
   messageID: string;
+  timeStart?: number;
+  timeEnd?: number;
 }
 
 interface PartUpdateEvent {
@@ -26,7 +28,7 @@ interface PartUpdateEvent {
       type?: string;
       text?: string;
       messageID?: string;
-      time?: { end?: number };
+      time?: { start?: number; end?: number };
     };
   };
 }
@@ -113,6 +115,8 @@ export function handlePartUpdate(
     type: part.type,
     text: part.text ?? "",
     messageID: part.messageID,
+    timeStart: part.time?.start,
+    timeEnd: part.time?.end,
   });
 }
 
@@ -160,6 +164,20 @@ export function flushAssistantOutput(options: FlushAssistantOutputOptions): void
   const reasoning = parts.filter((p) => p.type === "reasoning").map((p) => p.text).join("\n");
   if (!text && !reasoning) return;
 
+  // Compute duration from parts if not provided by event
+  let computedDuration = durationMs;
+  if (computedDuration === undefined) {
+    let minStart = Infinity;
+    let maxEnd = 0;
+    for (const p of parts) {
+      if (p.timeStart != null && p.timeStart < minStart) minStart = p.timeStart;
+      if (p.timeEnd != null && p.timeEnd > maxEnd) maxEnd = p.timeEnd;
+    }
+    if (minStart !== Infinity && maxEnd > 0) {
+      computedDuration = maxEnd - minStart;
+    }
+  }
+
   const ts = timestamp ?? new Date().toISOString();
   const record: Record<string, unknown> = {
     timestamp: ts,
@@ -175,7 +193,7 @@ export function flushAssistantOutput(options: FlushAssistantOutputOptions): void
   if (opencodeVersion) record.opencode_version = opencodeVersion;
   record.output = text;
   if (mode) record.mode = mode;
-  if (durationMs !== undefined) record.duration_ms = durationMs;
+  if (computedDuration !== undefined) record.duration_ms = computedDuration;
   if (finishReason) record.finish_reason = finishReason;
   if (error) record.error = error;
   if (cwd) record.cwd = cwd;
