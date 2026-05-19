@@ -5,7 +5,6 @@ import { datePartition } from "./utils.js";
 export function appendCSV(
   baseDir: string,
   subdir: string,
-  _columns: string[],
   values: string[],
   date?: string,
 ): void {

@@ -18,6 +18,18 @@ interface PendingPart {
   messageID: string;
 }
 
+interface PartUpdateEvent {
+  properties?: {
+    part?: {
+      id?: string;
+      type?: string;
+      text?: string;
+      messageID?: string;
+      time?: { end?: number };
+    };
+  };
+}
+
 const pendingParts = new Map<string, PendingPart>();
 
 export interface HandleChatMessageOptions {
@@ -81,7 +93,7 @@ const PART_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export function handlePartUpdate(
   base: string,
-  event: { properties?: { part?: { id?: string; type?: string; text?: string; messageID?: string; time?: { end?: number } } } },
+  event: PartUpdateEvent,
 ): void {
   const part = event.properties?.part;
   if (!part?.type || !part.id || !part.messageID) return;
