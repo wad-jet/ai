@@ -12,8 +12,7 @@ interface ChatOutput {
         text?: string;
     }[];
 }
-export declare function handleChatMessage(base: string, input: ChatInput, output: ChatOutput, timestamp?: string, rootDir?: string, username?: string, providerId?: string, modelId?: string, opencodeVersion?: string, projectId?: string, gitBranch?: string, skills?: string[], config?: Config): void;
-export declare function handlePartUpdate(base: string, event: {
+interface PartUpdateEvent {
     properties?: {
         part?: {
             id?: string;
@@ -25,7 +24,24 @@ export declare function handlePartUpdate(base: string, event: {
             };
         };
     };
-}): void;
+}
+export interface HandleChatMessageOptions {
+    base: string;
+    input: ChatInput;
+    output: ChatOutput;
+    timestamp?: string;
+    rootDir?: string;
+    username?: string;
+    providerId?: string;
+    modelId?: string;
+    opencodeVersion?: string;
+    projectId?: string;
+    gitBranch?: string;
+    skills?: string[];
+    config?: Config;
+}
+export declare function handleChatMessage(options: HandleChatMessageOptions): void;
+export declare function handlePartUpdate(base: string, event: PartUpdateEvent): void;
 export interface FlushAssistantOutputOptions {
     base: string;
     msgId: string;

@@ -5,6 +5,3 @@ const BASE = join(homedir(), ".local", "share", "opencode", PLUGIN_ROOT);
 export function getDataDir() {
     return BASE;
 }
-export function getSubDir(sub) {
-    return join(BASE, sub);
-}

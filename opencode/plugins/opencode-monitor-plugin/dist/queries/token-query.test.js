@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { appendCSV } from "../storage/csv-writer.js";
 import { queryTokenSummary, queryAgentBreakdown, queryDailyBreakdown } from "./token-query.js";
+import { TOKEN_STATUS } from "../constants.js";
 let testNum = 0;
 function freshDir() {
     const dir = join(tmpdir(), "monitor-query-test-" + Date.now() + "-" + (testNum++));
@@ -20,9 +21,8 @@ function approx(a, b) {
     return Math.abs(a - b) < 0.0001;
 }
 function writeCSV(base, date, rows) {
-    const cols = ["ts", "agent", "session_id", "provider", "model", "in", "out", "reasoning", "cache_r", "cache_w", "cost"];
     for (const row of rows) {
-        appendCSV(base, "token-status", cols, row, date);
+        appendCSV(base, TOKEN_STATUS, row, date);
     }
 }
 describe("token-query", () => {

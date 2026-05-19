@@ -1,9 +1,7 @@
 import { appendFileSync, readFileSync, existsSync, mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-function datePartition() {
-    return new Date().toISOString().slice(0, 10);
-}
-export function appendCSV(baseDir, subdir, _columns, values, date) {
+import { datePartition } from "./utils.js";
+export function appendCSV(baseDir, subdir, values, date) {
     const day = date ?? datePartition();
     const dir = join(baseDir, subdir);
     const file = join(dir, `${day}.csv`);

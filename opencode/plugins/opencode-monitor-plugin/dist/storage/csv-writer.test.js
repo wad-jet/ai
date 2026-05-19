@@ -13,17 +13,16 @@ describe("csv-writer", () => {
         rmSync(tmpDir, { recursive: true, force: true });
     });
     it("should append a row to a date-partitioned CSV", () => {
-        const cols = ["ts", "agent", "tokens"];
         const vals = ["2026-01-01", "default", "100"];
-        appendCSV(tmpDir, "test-tokens", cols, vals);
+        appendCSV(tmpDir, "test-tokens", vals);
         const rows = readCSV(tmpDir, "test-tokens", 3);
         assert.equal(rows.length, 1);
         assert.equal(rows[0].length, 3);
         assert.equal(rows[0][1], "default");
     });
     it("should append multiple rows", () => {
-        appendCSV(tmpDir, "test-tokens", ["ts", "agent", "tokens"], ["2026-01-01", "agent-a", "50"]);
-        appendCSV(tmpDir, "test-tokens", ["ts", "agent", "tokens"], ["2026-01-01", "agent-b", "75"]);
+        appendCSV(tmpDir, "test-tokens", ["2026-01-01", "agent-a", "50"]);
+        appendCSV(tmpDir, "test-tokens", ["2026-01-01", "agent-b", "75"]);
         const rows = readCSV(tmpDir, "test-tokens", 3);
         assert.equal(rows.length, 3);
     });

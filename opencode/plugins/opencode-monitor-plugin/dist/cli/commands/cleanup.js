@@ -37,13 +37,6 @@ function formatSize(bytes) {
         return `${(bytes / 1024).toFixed(1)} KB`;
     return `${bytes} B`;
 }
-function formatTotalSize(bytes) {
-    if (bytes >= 1024 * 1024)
-        return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-    if (bytes >= 1024)
-        return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${bytes} B`;
-}
 export function formatCleanupPreview(files) {
     const lines = [];
     lines.push("Files to delete:");
@@ -55,7 +48,7 @@ export function formatCleanupPreview(files) {
         lines.push(`  ${f.date.padEnd(12)} ${f.type.padEnd(16)} ${formatSize(f.size).padStart(8)}`);
     }
     lines.push(`  ${"─".repeat(40)}`);
-    lines.push(`  Total: ${files.length} files, ${formatTotalSize(totalSize)}`);
+    lines.push(`  Total: ${files.length} files, ${formatSize(totalSize)}`);
     return lines.join("\n");
 }
 function confirmDelete(count) {

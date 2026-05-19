@@ -1,9 +1,10 @@
 import { appendJSONL } from "../storage/jsonl-writer.js";
+import { SESSION_LOGS } from "../constants.js";
 const pendingParts = new Map();
-export function handleChatMessage(base, input, output, timestamp, rootDir, username, providerId, modelId, opencodeVersion, projectId, gitBranch, skills, config) {
-    const ts = timestamp ?? new Date().toISOString();
-    const includeThinking = config?.includeThinking ?? false;
-    const parts = output.parts ?? [];
+export function handleChatMessage(options) {
+    const ts = options.timestamp ?? new Date().toISOString();
+    const includeThinking = options.config?.includeThinking ?? false;
+    const parts = options.output.parts ?? [];
     const text = parts
         .filter((p) => p.type === "text")
         .map((p) => p.text ?? "")
@@ -12,28 +13,28 @@ export function handleChatMessage(base, input, output, timestamp, rootDir, usern
         .filter((p) => p.type === "reasoning")
         .map((p) => p.text ?? "")
         .join("\n");
-    const isUser = output.message?.role === "user";
+    const isUser = options.output.message?.role === "user";
     const record = {
         timestamp: ts,
-        session_id: input.sessionID ?? "",
-        agent: input.agent ?? "unknown",
+        session_id: options.input.sessionID ?? "",
+        agent: options.input.agent ?? "unknown",
     };
-    if (username)
-        record.username = username;
-    if (projectId)
-        record.project_id = projectId;
-    if (gitBranch)
-        record.git_branch = gitBranch;
-    if (rootDir)
-        record.root_dir = rootDir;
-    if (providerId)
-        record.provider_id = providerId;
-    if (modelId)
-        record.model_id = modelId;
-    if (opencodeVersion)
-        record.opencode_version = opencodeVersion;
-    if (!isUser && skills) {
-        record.skills = skills;
+    if (options.username)
+        record.username = options.username;
+    if (options.projectId)
+        record.project_id = options.projectId;
+    if (options.gitBranch)
+        record.git_branch = options.gitBranch;
+    if (options.rootDir)
+        record.root_dir = options.rootDir;
+    if (options.providerId)
+        record.provider_id = options.providerId;
+    if (options.modelId)
+        record.model_id = options.modelId;
+    if (options.opencodeVersion)
+        record.opencode_version = options.opencodeVersion;
+    if (!isUser && options.skills) {
+        record.skills = options.skills;
     }
     if (isUser) {
         record.input = text;
@@ -43,7 +44,7 @@ export function handleChatMessage(base, input, output, timestamp, rootDir, usern
     }
     if (includeThinking && thinkingText)
         record.thinking = thinkingText;
-    appendJSONL(base, "session-logs", record);
+    appendJSONL(options.base, SESSION_LOGS, record);
 }
 const PART_TTL_MS = 5 * 60 * 1000; // 5 minutes
 export function handlePartUpdate(base, event) {
@@ -117,5 +118,5 @@ export function flushAssistantOutput(options) {
         record.thinking = reasoning;
     if (skills)
         record.skills = skills;
-    appendJSONL(base, "session-logs", record);
+    appendJSONL(base, SESSION_LOGS, record);
 }

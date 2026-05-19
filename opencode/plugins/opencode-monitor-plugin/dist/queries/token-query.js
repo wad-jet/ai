@@ -1,11 +1,15 @@
 import { readCSV } from "../storage/csv-writer.js";
+import { TOKEN_STATUS } from "../constants.js";
 const COL_COUNT = 11;
 const COL = {
     TS: 0, AGENT: 1, SESSION: 2, PROVIDER: 3, MODEL: 4,
     IN: 5, OUT: 6, REASONING: 7, CACHE_R: 8, CACHE_W: 9, COST: 10,
 };
+function roundCost(cost) {
+    return Math.round(cost * 1e6) / 1e6;
+}
 export function queryTokenSummary(base, days) {
-    const rows = readCSV(base, "token-status", COL_COUNT, days);
+    const rows = readCSV(base, TOKEN_STATUS, COL_COUNT, days);
     const summary = {
         totalInput: 0, totalOutput: 0, totalReasoning: 0,
         totalCacheRead: 0, totalCacheWrite: 0, totalCost: 0, totalRows: rows.length,
@@ -18,11 +22,11 @@ export function queryTokenSummary(base, days) {
         summary.totalCacheWrite += Number(row[COL.CACHE_W]) || 0;
         summary.totalCost += Number(row[COL.COST]) || 0;
     }
-    summary.totalCost = Math.round(summary.totalCost * 1e6) / 1e6;
+    summary.totalCost = roundCost(summary.totalCost);
     return summary;
 }
 export function queryDailyBreakdown(base, days) {
-    const rows = readCSV(base, "token-status", COL_COUNT, days);
+    const rows = readCSV(base, TOKEN_STATUS, COL_COUNT, days);
     const map = new Map();
     for (const row of rows) {
         const date = (row[COL.TS] ?? "").slice(0, 10);
@@ -39,14 +43,14 @@ export function queryDailyBreakdown(base, days) {
         map.set(date, entry);
     }
     for (const entry of map.values()) {
-        entry.cost = Math.round(entry.cost * 1e6) / 1e6;
+        entry.cost = roundCost(entry.cost);
     }
     const result = Array.from(map.values());
     result.sort((a, b) => a.date.localeCompare(b.date));
     return result;
 }
 export function queryAgentBreakdown(base, days, sortBy, topN) {
-    const rows = readCSV(base, "token-status", COL_COUNT, days);
+    const rows = readCSV(base, TOKEN_STATUS, COL_COUNT, days);
     const map = new Map();
     for (const row of rows) {
         const agent = row[COL.AGENT] || "unknown";
@@ -58,7 +62,7 @@ export function queryAgentBreakdown(base, days, sortBy, topN) {
         map.set(agent, entry);
     }
     for (const entry of map.values()) {
-        entry.cost = Math.round(entry.cost * 1e6) / 1e6;
+        entry.cost = roundCost(entry.cost);
     }
     const result = Array.from(map.values());
     result.sort((a, b) => sortBy === "cost" ? b.cost - a.cost : (b.input + b.output) - (a.input + a.output));

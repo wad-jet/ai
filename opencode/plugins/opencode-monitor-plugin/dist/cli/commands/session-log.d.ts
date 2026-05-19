@@ -10,6 +10,7 @@ interface LogFilters {
     tail?: number;
     error?: boolean;
 }
-export declare function runSessionLogCLI(action: string, filters: LogFilters, basePath?: string, config?: Config): string;
+type SessionLogAction = "list" | "view" | "search" | "help";
+export declare function runSessionLogCLI(action: SessionLogAction, filters: LogFilters, basePath?: string, config?: Config): string;
 export {};
 //# sourceMappingURL=session-log.d.ts.map

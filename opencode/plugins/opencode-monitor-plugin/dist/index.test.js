@@ -7,6 +7,7 @@ import { handleTokenEvent } from "./collectors/token-collector.js";
 import { handleChatMessage } from "./collectors/session-collector.js";
 import { readCSV } from "./storage/csv-writer.js";
 import { readJSONL } from "./storage/jsonl-writer.js";
+import { SESSION_LOGS, TOKEN_STATUS } from "./constants.js";
 const BASE = join(tmpdir(), "monitor-integration-" + Date.now());
 after(() => {
     try {
@@ -37,16 +38,43 @@ describe("integration: collector pipeline", () => {
             message: { role: "user" },
             parts: [{ type: "text", text: "hello" }],
         };
-        handleChatMessage(BASE, chatInput, chatUserOutput, ts, "/test/project", "tester", "anthropic", "claude-3-opus", "1.15.0", "proj-1", "main", undefined, { includeThinking: true });
+        handleChatMessage({
+            base: BASE,
+            input: chatInput,
+            output: chatUserOutput,
+            timestamp: ts,
+            rootDir: "/test/project",
+            username: "tester",
+            providerId: "anthropic",
+            modelId: "claude-3-opus",
+            opencodeVersion: "1.15.0",
+            projectId: "proj-1",
+            gitBranch: "main",
+            config: { includeThinking: true },
+        });
         const chatAssistantOutput = {
             message: { role: "assistant" },
             parts: [{ type: "text", text: "world" }, { type: "reasoning", text: "thinking..." }],
         };
-        handleChatMessage(BASE, chatInput, chatAssistantOutput, ts, "/test/project", "tester", "anthropic", "claude-3-opus", "1.15.0", "proj-1", "main", ["skill-a"], { includeThinking: true });
-        const tokenRows = readCSV(BASE, "token-status", 11);
+        handleChatMessage({
+            base: BASE,
+            input: chatInput,
+            output: chatAssistantOutput,
+            timestamp: ts,
+            rootDir: "/test/project",
+            username: "tester",
+            providerId: "anthropic",
+            modelId: "claude-3-opus",
+            opencodeVersion: "1.15.0",
+            projectId: "proj-1",
+            gitBranch: "main",
+            skills: ["skill-a"],
+            config: { includeThinking: true },
+        });
+        const tokenRows = readCSV(BASE, TOKEN_STATUS, 11);
         assert.equal(tokenRows.length, 1);
         assert.equal(tokenRows[0][5], "100");
-        const logRecords = readJSONL(BASE, "session-logs");
+        const logRecords = readJSONL(BASE, SESSION_LOGS);
         assert.equal(logRecords.length, 2);
         assert.equal(logRecords[0].input, "hello");
         assert.equal(logRecords[0].root_dir, "/test/project");
