@@ -20,9 +20,9 @@
 ```
 
 После подключения плагин автоматически:
+- Копирует команды и скиллы из дистрибутива плагина в конфигурацию OpenCode
 - Собирает статистику токенов через hook `event` (`message.updated`)
 - Логирует запросы/ответы через hook `chat.message`
-- Регистрирует slash-команду `/token-status` (копирует command-файл в `~/.config/opencode/command/`)
 
 ### Конфигурация плагина
 
@@ -143,12 +143,11 @@ timestamp,agent,session_id,provider_id,model_id,input_tokens,output_tokens,reaso
 | `output` | string | Текст ответа модели (только assistant) |
 | `thinking` | string | Цепочка рассуждений (опционально) |
 | `mode` | string | Режим: `agent`/`chat` (только assistant, опционально) |
-| `duration_ms` | number | Длительность ответа в мс (только assistant, опционально) |
-| `finish_reason` | string | Причина завершения ассистента: `stop` (завершён естественно), `tool-calls` (были вызваны инструменты) (только assistant, опционально) |
+| `duration_ms` | number | Время генерации ответа в миллисекундах (только assistant, опционально) |
+| `finish_reason` | string | Причина завершения: `stop`, `tool-calls`, `error`, `abort`, `length` (только assistant, опционально) |
 | `error` | object | Объект ошибки (только assistant, опционально) |
 | `cwd` | string | Рабочая директория (только assistant, опционально) |
-| `skills` | string[] | Список вызванных скилов (только assistant, опционально) |
-| `thinking` | string | Цепочка рассуждений модели (опционально) |
+| `skills` | string[] | Список применённых скилов (только assistant, опционально) |
 
 ## Использование
 
